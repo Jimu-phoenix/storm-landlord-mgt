@@ -8,6 +8,7 @@ import {
   AlertCircle,
   Clock,
   Calendar,
+  Banknote,
   CreditCard,
   Landmark
 } from "lucide-react";import "../styles/Payments.css";
@@ -88,6 +89,9 @@ export default function Payments() {
         <div className="payments-actions">
           <button className="record-payment-btn">
             + Record Payment
+          </button>
+          <button className="record-payment-btn" onClick={()=>window.location.href = "/makepayments"}>
+            <CreditCard size={20}/> Make Payments
           </button>
         </div>
       </header>

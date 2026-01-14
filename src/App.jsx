@@ -7,6 +7,7 @@ import BusinessOverview from "./components/BusinessOverview";
 import Payments from './components/Payment'
 import Hostels from './components/Hostels'
 import Tenants from './components/Ternants'
+import MakePayments from './components/MakePayments'
 import SignUp from './pages/SignUp'
 import SignUpStorm from './pages/SignUp'
 
@@ -23,7 +24,7 @@ function App() {
       <Route path="/dashboard" element={<BusinessOverview />} />
       <Route path="/hostels-list" element={<Hostels />} />
       <Route path="/tenant-details" element={<Tenants />} />
-       <Route path="/payments" element={<Payments />} />
+      <Route path="/payments" element={<Payments />} />   
       <Route path="*" element={<h2>Page not found</h2>} />
     </Routes>
     </BrowserRouter>
