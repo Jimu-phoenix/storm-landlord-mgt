@@ -30,13 +30,16 @@ export default function PayBills() {
 
   return (
     <div className="paybills-simple">
+      {/* Header */}
       <div className="paybills-header">
         <h1>Pay Bills</h1>
         <p>Pay your utility bills securely</p>
       </div>
 
       <div className="paybills-content">
+        {/* Left Side - Form */}
         <div className="paybills-form">
+          {/* Service Selection */}
           <div className="service-select">
             <h3>Select Service</h3>
             <div className="service-options">
@@ -143,7 +146,8 @@ export default function PayBills() {
           </form>
         </div>
 
-=        <div className="paybills-summary">
+        {/* Right Side - Summary */}
+        <div className="paybills-summary">
           <div className="summary-card-simple">
             <h3>Payment Summary</h3>
             
