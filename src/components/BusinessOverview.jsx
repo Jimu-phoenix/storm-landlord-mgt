@@ -9,7 +9,9 @@ import "../styles/BusinessOverview.css";
 
 export default function BusinessOverview() {
   return (
-    <div className="dashboard-container">
+    <>
+    
+      <div className="dashboard-container">
       <header className="dashboard-header">
         <h1>Dashboard</h1>
         <p className="dashboard-subtitle">
@@ -177,5 +179,6 @@ export default function BusinessOverview() {
         </div>
       </section>
     </div>
+    </>
   );
 }

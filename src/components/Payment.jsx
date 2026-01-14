@@ -19,7 +19,7 @@ export default function Payments() {
       id: 1,
       tenant: "John Smith",
       property: "Sunset Apartments",
-      amount: "$1,200",
+      amount: "MK1,200",
       dueDate: "01/01/2026",
       paidDate: "28/12/2025",
       method: "Bank Transfer",
@@ -30,7 +30,7 @@ export default function Payments() {
       id: 2,
       tenant: "Sarah Johnson",
       property: "Sunset Apartments",
-      amount: "$1,200",
+      amount: "MK1,200",
       dueDate: "01/01/2026",
       paidDate: "05/01/2026",
       method: "Credit Card",
@@ -41,7 +41,7 @@ export default function Payments() {
       id: 3,
       tenant: "Michael Brown",
       property: "Riverside Complex",
-      amount: "$950",
+      amount: "MK950",
       dueDate: "01/01/2026",
       paidDate: "-",
       method: "-",
@@ -52,7 +52,7 @@ export default function Payments() {
       id: 4,
       tenant: "Emily Davis",
       property: "Park View Residences",
-      amount: "$1,500",
+      amount: "MK1,500",
       dueDate: "01/01/2026",
       paidDate: "10/01/2026",
       method: "Bank Transfer",
@@ -63,7 +63,7 @@ export default function Payments() {
       id: 5,
       tenant: "David Wilson",
       property: "Park View Residences",
-      amount: "$1,500",
+      amount: "MK1,500",
       dueDate: "01/01/2026",
       paidDate: "-",
       method: "-",
@@ -72,11 +72,11 @@ export default function Payments() {
     }
   ]);
 
-  const totalAmount = "$7,550";
+  const totalAmount = "MK7,550";
   const totalPayments = payments.length;
-  const receivedAmount = "$5,100";
+  const receivedAmount = "MK5,100";
   const receivedCount = payments.filter(p => p.status === "paid").length;
-  const overdueAmount = "$950";
+  const overdueAmount = "MK950";
   const overdueCount = payments.filter(p => p.status === "overdue").length;
 
   return (
@@ -90,7 +90,7 @@ export default function Payments() {
           <button className="record-payment-btn">
             + Record Payment
           </button>
-          <button className="record-payment-btn" onClick={()=>window.location.href = "/makepayments"}>
+          <button className="record-payment-btn" onClick={()=>window.location.href = "/landlord-dashboard/paybills"}>
             <CreditCard size={20}/> Make Payments
           </button>
         </div>
