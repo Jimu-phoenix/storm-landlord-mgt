@@ -8,7 +8,7 @@ import BusinessOverview from "./components/BusinessOverview";
 import Payments from "./components/Payment";
 import Hostels from "./components/Hostels";
 import Tenants from "./components/Tenants";
-// import PayBills from "./components/PayBills"; // import missing
+import PayBills from "./components/PayBills";
 import TenantDashboard from "./pages/TenantDashboard";
 import { SignedIn, SignedOut } from "@clerk/clerk-react";
 
@@ -43,7 +43,7 @@ function App() {
           <Route path="hostels" element={<Hostels />} />
           <Route path="tenants" element={<Tenants />} />
           <Route path="payments" element={<Payments />} />
-          {/* <Route path="paybills" element={<PayBills />} /> */}
+          <Route path="paybills" element={<PayBills />} />
         </Route>
 
         <Route path="/tenantdash" element={<TenantDashboard />} />
