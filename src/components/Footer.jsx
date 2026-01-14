@@ -1,5 +1,5 @@
 import React from 'react';
-import '../styles/footer.css';
+import '../styles/Footer.css';
 import { MailIcon, Phone } from 'lucide-react';
 
 function Footer() {

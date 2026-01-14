@@ -2,6 +2,7 @@ import React from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './App.css'
 import Landing from './pages/Landing'
+import { Navigate } from 'react-router-dom'
 import Login from './pages/Login'
 import BusinessOverview from "./components/BusinessOverview";
 import Payments from './components/Payment'
@@ -10,6 +11,25 @@ import Tenants from './components/Ternants'
 import MakePayments from './components/MakePayments'
 import SignUp from './pages/SignUp'
 import SignUpStorm from './pages/SignUp'
+import { SignedIn, SignedOut } from '@clerk/clerk-react'
+import TenantDashboard from './pages/TenantDashboard'
+
+
+function ProtectedRoute({children}){
+  return(
+    <>
+    
+    <SignedIn>
+      {children}
+    </SignedIn>
+
+    <SignedOut>
+      <Navigate to={'/login'}/>
+    </SignedOut>
+
+    </>
+  )
+}
 
 
 function App() {
@@ -22,9 +42,7 @@ function App() {
       <Route path='/login' element={<Login />}/>
       <Route path='/signup' element={<SignUpStorm />}/>
       <Route path="/dashboard" element={<BusinessOverview />} />
-      <Route path="/hostels-list" element={<Hostels />} />
-      <Route path="/tenant-details" element={<Tenants />} />
-      <Route path="/payments" element={<Payments />} />   
+      <Route path="/tenantdash" element={<TenantDashboard />} />
       <Route path="*" element={<h2>Page not found</h2>} />
     </Routes>
     </BrowserRouter>
