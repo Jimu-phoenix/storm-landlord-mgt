@@ -1,0 +1,221 @@
+/* Landing Page Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--primary-font-family);
+  color: var(--primary-color);
+  line-height: var(--line-height);
+}
+
+.landing-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-lg);
+}
+
+/* Hero Section */
+.hero {
+  padding: var(--spacing-xl) 0;
+  background: linear-gradient(135deg, var(--surface-color) 0%, var(--background-color) 100%);
+}
+
+.hero-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-xl);
+  align-items: center;
+}
+
+.hero-text h1 {
+  font-size: var(--font-size-2xl);
+  margin-bottom: var(--spacing-md);
+  line-height: 1.2;
+}
+
+.hero-text p {
+  color: var(--secondary-color);
+  margin-bottom: var(--spacing-lg);
+  font-size: var(--font-size-lg);
+}
+
+.hero-image img {
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+.hero-btns{
+    display: flex;
+    flex-direction: column;
+}
+.hero-btns .btn{
+    margin-top: var(--spacing-sm);
+    width: 300px;
+}
+.hero-btns .btn:nth-child(2){
+    background-color: white;
+    color: var(--primary-color);
+    border: 2px solid var(--primary-color);
+}
+/* Features Section */
+.features {
+  padding: var(--spacing-xl) 0;
+}
+
+.section-title {
+  text-align: center;
+  font-size: var(--font-size-xl);
+  margin-bottom: var(--spacing-xl);
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.feature-card {
+  padding: var(--spacing-lg);
+  background: var(--surface-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  transition: transform 0.3s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+}
+
+.feature-icon {
+  font-size: 2rem;
+  margin-bottom: var(--spacing-md);
+}
+
+.feature-card h3 {
+  margin-bottom: var(--spacing-sm);
+  font-size: var(--font-size-lg);
+}
+
+/* Offline Feature */
+.offline-section {
+  padding: var(--spacing-xl) 0;
+  background: var(--surface-color);
+}
+
+.offline-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-xl);
+  align-items: center;
+}
+
+.offline-text h2 {
+  margin-bottom: var(--spacing-md);
+}
+
+/* Search Preview */
+.search-preview {
+  padding: var(--spacing-xl) 0;
+}
+
+.search-box {
+  max-width: 600px;
+  margin: 0 auto;
+  background: var(--surface-color);
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.search-inputs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.input-group label {
+  margin-bottom: var(--spacing-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+.input-group select,
+.input-group input {
+  padding: var(--spacing-sm);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font-family: var(--primary-font-family);
+}
+
+.search-btn {
+  width: 100%;
+  padding: var(--spacing-md);
+}
+
+/* CTA Section */
+.cta-section {
+  padding: var(--spacing-xl) 0;
+  text-align: center;
+  background: linear-gradient(135deg, var(--primary-color) 0%, #1a1a1a 100%);
+  color: var(--button-text-color);
+  margin-bottom: var(--spacing-xl);
+}
+
+.cta-content h2 {
+  margin-bottom: var(--spacing-md);
+  font-size: var(--font-size-xl);
+}
+
+.cta-buttons {
+  display: flex;
+  gap: var(--spacing-md);
+  justify-content: center;
+  margin-top: var(--spacing-lg);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .hero-content,
+  .offline-content {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+  .hero-btns{
+    width: 100%;
+    align-items: center;
+  }
+  
+  .hero-image img {
+    height: 300px;
+  }
+  
+  .cta-buttons {
+    flex-direction: column;
+  }
+  .offlineImg{
+    height: 200px;
+  }
+  .search-inputs {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .section-title {
+    font-size: var(--font-size-lg);
+  }
+}

@@ -1,0 +1,18 @@
+.sign_container{
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+}
+.sign_container img{
+    width: 50%;
+}
+.sign_component{
+    margin: auto;
+}
+
+@media screen and (max-width: 768px) {
+    .sign_container img{
+    display: none;
+}
+}
