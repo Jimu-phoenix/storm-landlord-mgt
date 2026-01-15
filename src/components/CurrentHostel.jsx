@@ -1,6 +1,6 @@
 import { AlertCircle, Search, CheckCircle, Home, X } from "lucide-react";
 import '../styles/CurrentHostel.css';
-import { supabase } from "../../supabaseClient";
+import { supabase } from "../lib/SupabaseClient";
 import { useEffect, useState } from "react";
 import { useUser } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";

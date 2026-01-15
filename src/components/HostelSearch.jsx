@@ -1,7 +1,7 @@
 import { Search, Filter, MapPin, Bed, DollarSign, AlertCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useUser } from '@clerk/clerk-react';
-import { supabase } from '../../supabaseClient';
+import { supabase } from '../lib/SupabaseClient';
 import Modal from './Modal';
 import '../styles/HostelSearch.css';
 
