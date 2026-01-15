@@ -1,31 +1,111 @@
 import React, { useState } from "react";
-import { Zap, Droplet, Smartphone, Landmark,CreditCard, LightbulbIcon, ShieldAlertIcon, UserLockIcon, HandCoinsIcon, PhoneForwarded, LockIcon } from "lucide-react";
+import {
+  Zap,
+  Droplet,
+  Smartphone,
+  Landmark,
+  CreditCard,
+  LightbulbIcon,
+  ShieldAlertIcon,
+  UserLockIcon,
+  HandCoinsIcon,
+  PhoneForwarded,
+  LockIcon,
+} from "lucide-react";
+import { useUser } from "@clerk/clerk-react";
 import "../styles/PayBills.css";
 
 export default function PayBills() {
+  const { user, isLoaded } = useUser();
+
   const [paymentMethod, setPaymentMethod] = useState("airtel");
   const [selectedService, setSelectedService] = useState("electricity");
   const [customerNumber, setCustomerNumber] = useState("");
   const [amount, setAmount] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const services = [
-    { id: "electricity", name: "ESCOM", description: "Electricity Bill", icon: <Zap size={24} color="#F2A444"/>, color: "#FF6B35" },
-    { id: "water", name: "Water Board", description: "Water Bill", icon: <Droplet size={24} color="blue"/>, color: "#1E96FC" },
+    {
+      id: "electricity",
+      name: "ESCOM",
+      description: "Electricity Bill",
+      icon: <Zap size={24} color="#F2A444" />,
+      color: "#FF6B35",
+    },
+    {
+      id: "water",
+      name: "Water Board",
+      description: "Water Bill",
+      icon: <Droplet size={24} color="blue" />,
+      color: "#1E96FC",
+    },
   ];
 
   const paymentOptions = [
-    { id: "airtel", name: "Airtel Money", icon: <Smartphone size={24}/> },
-    { id: "tnm", name: "TNM Mpamba", icon: <Smartphone size={24}/> },
-    { id: "bank", name: "Bank Transfer", icon: <Landmark size={24}/> },
-    { id: "card", name: "Card Payment", icon: <CreditCard/> },
+    { id: "airtel", name: "Airtel Money", icon: <Smartphone size={24} /> },
+    { id: "tnm", name: "TNM Mpamba", icon: <Smartphone size={24} /> },
+    { id: "bank", name: "Bank Transfer", icon: <Landmark size={24} /> },
+    { id: "card", name: "Card Payment", icon: <CreditCard /> },
   ];
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const serviceName = selectedService === "electricity" ? "ESCOM" : "Water Board";
-    const methodName = paymentOptions.find(p => p.id === paymentMethod)?.name;
-    alert(`Payment of MWK ${amount} to ${serviceName} via ${methodName} submitted!`);
+
+    if (!isLoaded || !user) {
+      alert("User not authenticated");
+      return;
+    }
+
+    setLoading(true);
+
+    const payload = {
+      fullName: `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim(),
+      email: user.primaryEmailAddress?.emailAddress,
+      phoneNumber: phoneNumber || null,
+      customerAccountNumber: customerNumber,
+      amount: Number(amount),
+      paymentMethod:
+        paymentMethod === "airtel"
+          ? "airtel_money"
+          : paymentMethod === "tnm"
+          ? "tnm_mpamba"
+          : paymentMethod,
+      billerCode:
+        selectedService === "electricity" ? "ESCOM" : "WATER_BOARD",
+    };
+
+    try {
+      const res = await fetch(
+        "https://wokopaysandbox.onrender.com/api/bills/pay-with-user",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Payment failed");
+      }
+
+      alert("✅ Bill payment successful!");
+      console.log("Payment response:", data);
+
+      // optional reset
+      setCustomerNumber("");
+      setAmount("");
+      setPhoneNumber("");
+    } catch (err) {
+      console.error(err);
+      alert(`❌ ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -47,11 +127,19 @@ export default function PayBills() {
                 <button
                   key={service.id}
                   type="button"
-                  className={`service-btn ${selectedService === service.id ? 'active' : ''}`}
+                  className={`service-btn ${
+                    selectedService === service.id ? "active" : ""
+                  }`}
                   onClick={() => setSelectedService(service.id)}
                   style={{
-                    backgroundColor: selectedService === service.id ? service.color + '15' : 'transparent',
-                    borderColor: selectedService === service.id ? service.color : 'var(--border-color)'
+                    backgroundColor:
+                      selectedService === service.id
+                        ? service.color + "15"
+                        : "transparent",
+                    borderColor:
+                      selectedService === service.id
+                        ? service.color
+                        : "var(--border-color)",
                   }}
                 >
                   <span className="service-icon">{service.icon}</span>
@@ -67,7 +155,9 @@ export default function PayBills() {
           {/* Bill Form */}
           <form onSubmit={handleSubmit} className="bill-form-simple">
             <div className="form-group">
-              <label><UserLockIcon size={20}/> Account Number</label>
+              <label>
+                <UserLockIcon size={20} /> Account Number
+              </label>
               <input
                 type="text"
                 placeholder="Enter your account number"
@@ -78,7 +168,9 @@ export default function PayBills() {
             </div>
 
             <div className="form-group">
-              <label><HandCoinsIcon size={20}/> Amount (MWK)</label>
+              <label>
+                <HandCoinsIcon size={20} /> Amount (MWK)
+              </label>
               <input
                 type="number"
                 placeholder="Enter amount"
@@ -89,7 +181,9 @@ export default function PayBills() {
             </div>
 
             <div className="form-group">
-              <label><PhoneForwarded size={20}/> Phone Number (Optional)</label>
+              <label>
+                <PhoneForwarded size={20} /> Phone Number (Optional)
+              </label>
               <input
                 type="tel"
                 placeholder="+265 XXX XXX XXX"
@@ -106,7 +200,9 @@ export default function PayBills() {
                   <button
                     key={option.id}
                     type="button"
-                    className={`pay-option ${paymentMethod === option.id ? 'active' : ''}`}
+                    className={`pay-option ${
+                      paymentMethod === option.id ? "active" : ""
+                    }`}
                     onClick={() => setPaymentMethod(option.id)}
                   >
                     <span className="pay-icon">{option.icon}</span>
@@ -116,17 +212,25 @@ export default function PayBills() {
               </div>
             </div>
 
-            {/* Card Details if Card selected */}
-            {paymentMethod === 'card' && (
+            {/* Card Details */}
+            {paymentMethod === "card" && (
               <div className="card-details-simple">
                 <div className="form-group">
                   <label>Card Number</label>
-                  <input type="text" placeholder="1234 5678 9012 3456" maxLength="19" />
+                  <input
+                    type="text"
+                    placeholder="1234 5678 9012 3456"
+                    maxLength="19"
+                  />
                 </div>
                 <div className="form-row">
                   <div className="form-group">
                     <label>Expiry Date</label>
-                    <input type="text" placeholder="MM/YY" maxLength="5" />
+                    <input
+                      type="text"
+                      placeholder="MM/YY"
+                      maxLength="5"
+                    />
                   </div>
                   <div className="form-group">
                     <label>CVV</label>
@@ -136,12 +240,13 @@ export default function PayBills() {
               </div>
             )}
 
-            <button type="submit" className="submit-btn">
-              <LockIcon size={24}/> Pay MWK {amount || "0.00"}
+            <button type="submit" className="submit-btn" disabled={loading}>
+              <LockIcon size={24} />{" "}
+              {loading ? "Processing..." : `Pay MWK ${amount || "0.00"}`}
             </button>
 
             <div className="security-note">
-              <ShieldAlertIcon size={20}/> Secure payment • Encrypted connection
+              <ShieldAlertIcon size={20} /> Secure payment • Encrypted connection
             </div>
           </form>
         </div>
@@ -150,14 +255,22 @@ export default function PayBills() {
         <div className="paybills-summary">
           <div className="summary-card-simple">
             <h3>Payment Summary</h3>
-            
+
             <div className="summary-service">
               <span className="summary-service-icon">
                 {selectedService === "electricity" ? "⚡" : "💧"}
               </span>
               <div>
-                <h4>{selectedService === "electricity" ? "ESCOM" : "Water Board"}</h4>
-                <p>{selectedService === "electricity" ? "Electricity Bill" : "Water Bill"}</p>
+                <h4>
+                  {selectedService === "electricity"
+                    ? "ESCOM"
+                    : "Water Board"}
+                </h4>
+                <p>
+                  {selectedService === "electricity"
+                    ? "Electricity Bill"
+                    : "Water Bill"}
+                </p>
               </div>
             </div>
 
@@ -168,24 +281,40 @@ export default function PayBills() {
               </div>
               <div className="summary-item">
                 <span>Amount</span>
-                <span className="amount">MWK {amount || "0.00"}</span>
+                <span className="amount">
+                  MWK {amount || "0.00"}
+                </span>
               </div>
               <div className="summary-item">
                 <span>Payment Method</span>
-                <span>{paymentOptions.find(p => p.id === paymentMethod)?.name}</span>
+                <span>
+                  {
+                    paymentOptions.find(
+                      (p) => p.id === paymentMethod
+                    )?.name
+                  }
+                </span>
               </div>
             </div>
 
             <div className="summary-total">
               <div className="summary-item">
                 <span>Total</span>
-                <span className="total">MWK {amount || "0.00"}</span>
+                <span className="total">
+                  MWK {amount || "0.00"}
+                </span>
               </div>
             </div>
 
             <div className="summary-info">
-              <p><LightbulbIcon size={24}/> Your payment will be processed within 24 hours</p>
-              <p><Smartphone size={20}/> Save your receipt for reference</p>
+              <p>
+                <LightbulbIcon size={24} /> Your payment will be
+                processed within 24 hours
+              </p>
+              <p>
+                <Smartphone size={20} /> Save your receipt for
+                reference
+              </p>
             </div>
           </div>
         </div>
