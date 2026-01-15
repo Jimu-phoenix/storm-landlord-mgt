@@ -40,7 +40,7 @@ export default function Cross() {
         }
 
         if (existingUser) {
-          navigate(existingUser.user_type === 'tenant' ? '/tenantdash' : 'landlord-dashboard');
+          navigate(existingUser.user_type === 'tenant' ? '/tenantdash' : '/landlord-dashboard');
         } else {
           setChecking(false);
         }
