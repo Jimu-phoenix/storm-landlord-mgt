@@ -1,148 +1,323 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
     Search, 
-    Lock, Mail,
+    Lock, 
+    Mail,
     Phone, 
     MoreVertical, 
-    Eye, 
     Edit, 
-    Trash2, 
     Users,
     UserCheck,
     Clock
-
 } from "lucide-react";
+import { useUser } from '@clerk/clerk-react';
+import { createClient } from "@supabase/supabase-js";
+import EditTenantModal from "./ui/EditTenants";
+import AddTenantsModal from "./ui/AddTenant";
 import "../styles/Tenants.css";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
+
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
+);
 
 export default function Tenants() {
-  const [tenants] = useState([
-    {
-      id: 1,
-      initials: "CB",
-      name: "Chisomo Banda",
-      email: "chisomo@example.com",
-      property: "Sunrise Hostel",
-      paymentStatus: "Paid",
-      lastPayment: "Jan 10, 2026",
-      contact: "+265 991 234 567",
-      room: "Room 204"
-    },
-    {
-      id: 2,
-      initials: "MP",
-      name: "Mphatso Phiri",
-      email: "mphatso@example.com",
-      property: "Sunrise Hostel",
-      paymentStatus: "Pending",
-      lastPayment: "Dec 15, 2025",
-      contact: "+265 995 876 543",
-      room: "Room 105"
-    },
-    {
-      id: 3,
-      initials: "TM",
-      name: "Thokozani Mbewe",
-      email: "thokozani@example.com",
-      property: "Greenview House",
-      paymentStatus: "Paid",
-      lastPayment: "Jan 5, 2026",
-      contact: "+265 888 456 789",
-      room: "Unit B"
-    },
-    {
-      id: 4,
-      initials: "KN",
-      name: "Kondwani Nyirenda",
-      email: "kondwani@example.com",
-      property: "Kamuzu Hostel",
-      paymentStatus: "Overdue",
-      lastPayment: "Nov 20, 2025",
-      contact: "+265 999 123 456",
-      room: "Room 101"
-    },
-    {
-      id: 5,
-      initials: "PK",
-      name: "Pempero Kachingwe",
-      email: "pempero@example.com",
-      property: "Kamuzu Hostel",
-      paymentStatus: "Paid",
-      lastPayment: "Jan 8, 2026",
-      contact: "+265 991 789 012",
-      room: "Room 203"
-    },
-    {
-      id: 6,
-      initials: "AM",
-      name: "Alice Mwale",
-      email: "alice@example.com",
-      property: "Lake View Apartments",
-      paymentStatus: "Paid",
-      lastPayment: "Jan 12, 2026",
-      contact: "+265 992 345 678",
-      room: "Unit A"
-    },
-    {
-      id: 7,
-      initials: "JM",
-      name: "James Moyo",
-      email: "james@example.com",
-      property: "Blantyre House",
-      paymentStatus: "Pending",
-      lastPayment: "Jan 3, 2026",
-      contact: "+265 993 456 789",
-      room: "Main House"
+  const { user } = useUser();
+  const [tenants, setTenants] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [stats, setStats] = useState({
+    totalTenants: 0,
+    activeTenants: 0,
+    pendingApproval: 0
+  });
+  const [searchTerm, setSearchTerm] = useState("");
+  const [editingTenant, setEditingTenant] = useState(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false); 
+
+  useEffect(() => {
+    const fetchTenants = async () => {
+      if (!user) return;
+      
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        console.log("Fetching tenants...");
+        
+        const { data, error: supabaseError } = await supabase
+          .from('users')
+          .select('*')
+          .eq('user_type', 'tenant')
+          .order('created_at', { ascending: false });
+
+        if (supabaseError) {
+          console.error("Supabase error:", supabaseError);
+          throw supabaseError;
+        }
+
+        console.log("Tenants data:", data);
+        
+        const formattedTenants = data?.map(user => ({
+          id: user.id,
+          clerk_user_id: user.clerk_user_id,
+          name: user.full_name || 'Unknown',
+          email: user.email || 'No email',
+          phone: user.phone || 'No phone',
+          is_active: user.is_active,
+          user_type: user.user_type,
+          created_at: user.created_at,
+          updated_at: user.updated_at,
+          property: "Not Assigned", 
+          room: "N/A",
+          paymentStatus: "Pending", 
+          lastPayment: "Never",
+          initials: getInitials(user.full_name)
+        })) || [];
+
+        setTenants(formattedTenants);
+        
+        const totalTenants = data?.length || 0;
+        const activeTenants = data?.filter(t => t.is_active === true).length || 0;
+        const pendingApproval = data?.filter(t => t.is_active === false).length || 0;
+        
+        setStats({
+          totalTenants,
+          activeTenants,
+          pendingApproval
+        });
+
+      } catch (err) {
+        console.error("Error fetching tenants:", err);
+        setError(err.message || "Failed to fetch tenants");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchTenants();
+  }, [user, isAddModalOpen, isEditModalOpen]); 
+
+  const getInitials = (name) => {
+    if (!name) return "??";
+    return name
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
+  };
+
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+
+    doc.setFontSize(18);
+    doc.text("Tenants Report", 14, 20);
+
+    doc.setFontSize(11);
+    doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 28);
+    doc.text(`Generated by: ${user?.firstName || "User"}`, 14, 35);
+
+    const tableColumn = [
+      "Name",
+      "Email",
+      "Phone",
+      "Property",
+      "Room",
+      "Payment Status",
+      "Status"
+    ];
+
+    const tableRows = filteredTenants.map((tenant) => [
+      tenant.name,
+      tenant.email,
+      tenant.phone,
+      tenant.property,
+      tenant.room,
+      tenant.paymentStatus,
+      tenant.is_active ? "Active" : "Inactive"
+    ]);
+
+    autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+      startY: 45,
+      theme: "grid",
+      styles: {
+        fontSize: 9,
+        cellPadding: 3
+      },
+      headStyles: {
+        fillColor: [23, 73, 104], 
+        textColor: 255,
+        fontStyle: "bold"
+      },
+      alternateRowStyles: {
+        fillColor: [245, 245, 245]
+      }
+    });
+
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(10);
+      doc.text(
+        `Page ${i} of ${pageCount}`,
+        doc.internal.pageSize.getWidth() - 30,
+        doc.internal.pageSize.getHeight() - 10
+      );
     }
-  ]);
+
+    doc.save(`tenants-report-${new Date().toISOString().split("T")[0]}.pdf`);
+  };
+
+  const handleEditClick = (tenant) => {
+    setEditingTenant(tenant);
+    setIsEditModalOpen(true);
+  };
+
+  const handleAddTenantSuccess = (newTenant) => {
+    const formattedTenant = {
+      id: newTenant.id,
+      clerk_user_id: newTenant.clerk_user_id,
+      name: newTenant.full_name,
+      email: newTenant.email,
+      phone: newTenant.phone || 'No phone',
+      is_active: newTenant.is_active,
+      user_type: newTenant.user_type,
+      created_at: newTenant.created_at,
+      updated_at: newTenant.updated_at,
+      property: "Not Assigned", 
+      room: "N/A",
+      paymentStatus: "Pending", 
+      lastPayment: "Never",
+      initials: getInitials(newTenant.full_name)
+    };
+
+    setTenants(prev => [formattedTenant, ...prev]);
+    
+    setStats(prev => ({
+      totalTenants: prev.totalTenants + 1,
+      activeTenants: newTenant.is_active ? prev.activeTenants + 1 : prev.activeTenants,
+      pendingApproval: !newTenant.is_active ? prev.pendingApproval + 1 : prev.pendingApproval
+    }));
+  };
+
+  const handleActivateDeactivate = async (tenant) => {
+    try {
+      const newActiveStatus = !tenant.is_active;
+      
+      const { error } = await supabase
+        .from('users')
+        .update({ is_active: newActiveStatus })
+        .eq('id', tenant.id);
+
+      if (error) throw error;
+
+      setTenants(prev =>
+        prev.map(t => t.id === tenant.id ? { ...t, is_active: newActiveStatus } : t)
+      );
+
+      setStats(prev => ({
+        totalTenants: prev.totalTenants,
+        activeTenants: newActiveStatus ? prev.activeTenants + 1 : prev.activeTenants - 1,
+        pendingApproval: !newActiveStatus ? prev.pendingApproval + 1 : prev.pendingApproval - 1
+      }));
+
+    } catch (err) {
+      console.error("Error updating tenant status:", err);
+      setError("Failed to update tenant status");
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="tenants-container">
+        <div className="loading-message">
+          <p>Loading tenants...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="tenants-container">
+        <div className="error-message">
+          <h2>Error Loading Tenants</h2>
+          <p>{error}</p>
+          <button onClick={() => window.location.reload()} className="retry-btn">
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const filteredTenants = tenants.filter((tenant) => {
+    const query = searchTerm.toLowerCase();
+
+    return (
+      tenant.name?.toLowerCase().includes(query) ||
+      tenant.email?.toLowerCase().includes(query) ||
+      tenant.phone?.toLowerCase().includes(query) ||
+      tenant.property?.toLowerCase().includes(query) ||
+      tenant.room?.toLowerCase().includes(query)
+    );
+  });
 
   return (
     <div className="tenants-container">
-      {/* Header */}
       <header className="tenants-header">
         <div>
           <h1>Tenants</h1>
           <p className="tenants-subtitle">Manage tenant information and status</p>
         </div>
-        <button className="add-tenant-btn">
+        <button 
+          className="add-tenant-btn"
+          onClick={() => setIsAddModalOpen(true)}
+        >
           + Add Tenant
         </button>
       </header>      
+      
       <div className="tenant-stats-section">
         <div className="tenant-stat-grid">
-         
-            <div className="tenant-stat-card">
-                <div className="tenant-stat-header">
-                <span>Total Tenants</span>
-                <div className="tenant-stat-icon">
-                    <Users size={20} />
-                </div>
-                    <h2>8</h2>
-                </div>
+          <div className="tenant-stat-card">
+            <div className="tenant-stat-header">
+              <span>Total Tenants</span>
+              <div className="tenant-stat-icon">
+                <Users size={20} />
+              </div>
+              <h2>{stats.totalTenants}</h2>
             </div>
+          </div>
 
-            <div className="tenant-stat-card">
-                <div className="tenant-stat-header">
-                <span>Active Tenants</span>
-                <div className="tenant-stat-icon">
-                    <UserCheck size={20} />
-                </div>
-                    <h2>10</h2>
-                </div>
+          <div className="tenant-stat-card">
+            <div className="tenant-stat-header">
+              <span>Active Tenants</span>
+              <div className="tenant-stat-icon">
+                <UserCheck size={20} />
+              </div>
+              <h2>{stats.activeTenants}</h2>
             </div>
+          </div>
 
-            <div className="tenant-stat-card">
-                <div className="tenant-stat-header">
-                <span>Pending Approval</span>
-                <div className="tenant-stat-icon">
-                    <Clock size={20} />
-                </div>
-                    <h2>3</h2>
-                </div>
+          <div className="tenant-stat-card">
+            <div className="tenant-stat-header">
+              <span>Inactive Tenants</span>
+              <div className="tenant-stat-icon">
+                <Clock size={20} />
+              </div>
+              <h2>{stats.pendingApproval}</h2>
             </div>
+          </div>
         </div>
       </div>
 
-      {/* Search and Filters */}
       <div className="tenants-controls">
         <div className="tenant-search-container">
           <Search size={18} className="tenant-search-icon" />
@@ -150,19 +325,17 @@ export default function Tenants() {
             type="text"
             placeholder="Search tenants..."
             className="tenant-search-input"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
         <div className="tenant-filter-actions">
-          <button className="tenant-filter-btn">
-            Filter
-          </button>
-          <button className="tenant-export-btn">
+          <button className="tenant-export-btn" onClick={exportToPDF}>
             Export
           </button>
         </div>
       </div>
 
-      {/* Table */}
       <div className="tenants-table-container">
         <div className="tenant-table-responsive">
           <table className="tenants-table">
@@ -173,11 +346,12 @@ export default function Tenants() {
                 <th>PAYMENT STATUS</th>
                 <th>LAST PAYMENT</th>
                 <th>CONTACT</th>
+                <th>STATUS</th>
                 <th>ACTIONS</th>
               </tr>
             </thead>
             <tbody>
-              {tenants.map((tenant) => (
+              {filteredTenants.map((tenant) => (
                 <tr key={tenant.id} className="tenant-row">
                   <td className="tenant-cell">
                     <div className="tenant-info">
@@ -210,22 +384,29 @@ export default function Tenants() {
                   <td>
                     <div className="tenant-contact">
                       <Phone size={14} />
-                      <span>{tenant.contact}</span>
+                      <span>{tenant.phone}</span>
                     </div>
                   </td>
                   <td>
+                    <span className={`tenant-status-badge ${tenant.is_active ? 'active' : 'inactive'}`}>
+                      {tenant.is_active ? 'Active' : 'Inactive'}
+                    </span>
+                  </td>
+                  <td>
                     <div className="tenant-action-buttons">
-                      <button className="tenant-action-btn" title="View Details">
-                        <Eye size={16} />
-                      </button>
-                      <button className="tenant-action-btn" title="Edit">
+                      <button 
+                        className="tenant-action-btn" 
+                        title="Edit"
+                        onClick={() => handleEditClick(tenant)}
+                      >
                         <Edit size={16} />
                       </button>
-                      <button className="tenant-action-btn" title="Lock/Unlock">
+                      <button 
+                        className="tenant-action-btn" 
+                        title={tenant.is_active ? "Deactivate" : "Activate"}
+                        onClick={() => handleActivateDeactivate(tenant)}
+                      >
                         <Lock size={16} />
-                      </button>
-                      <button className="tenant-action-btn" title="More Options">
-                        <MoreVertical size={16} />
                       </button>
                     </div>
                   </td>
@@ -235,10 +416,9 @@ export default function Tenants() {
           </table>
         </div>
 
-        {/* Table Footer */}
         <div className="tenant-table-footer">
           <div className="tenant-showing-text">
-            Showing {tenants.length} of {tenants.length} tenants
+            Showing {filteredTenants.length} of {tenants.length} tenants
           </div>
           <div className="tenant-pagination">
             <button className="tenant-pagination-btn" disabled>
@@ -253,6 +433,34 @@ export default function Tenants() {
           </div>
         </div>
       </div>
+
+      {/* Add Tenant Modal */}
+      <AddTenantsModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSuccess={handleAddTenantSuccess}
+      />
+
+      {/* Edit Tenant Modal */}
+      <EditTenantModal
+        isOpen={isEditModalOpen}
+        tenantDetails={editingTenant}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setEditingTenant(null);
+        }}
+        onSuccess={(updatedTenant) => {
+          setTenants(prev =>
+            prev.map(t => t.id === updatedTenant.id ? {
+              ...t,
+              name: updatedTenant.full_name,
+              email: updatedTenant.email,
+              phone: updatedTenant.phone,
+              is_active: updatedTenant.is_active
+            } : t)
+          );
+        }}
+      />
     </div>
   );
 }
