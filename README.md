@@ -1,5 +1,5 @@
 
-# smartLord – Hostel Management System (MVP)
+# SmartLord – Hostel Management System (MVP)
 
 A modern, web-based hostel management platform built by **Prince Jimu, Precious Namondwe & Mwiza Sichinga** to help landlords manage hostels, tenants, and rent payments digitally, while enabling students to discover and connect with hostels near campus.  
 Built with **React, Vite, and Supabase** for fast development with PostgreSQL real-time database.
