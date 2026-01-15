@@ -19,8 +19,8 @@ Built with **React, Vite, and Supabase** for fast development with PostgreSQL re
 - Add/Edit hostel details 
 - View all tenants per hostel with room numbers
 - Record rent payments → mark as **Paid / Pending**
-- Log expenses (electricity, water, repairs)
-- **Financial Snapshot:** Monthly income vs expenses, net profit/loss
+- Pay bills (electricity, water, repairs)
+- **Financial Snapshot:** net profit/loss
 - Search tenants by name or room
 
 ### **Tenant Portal**
