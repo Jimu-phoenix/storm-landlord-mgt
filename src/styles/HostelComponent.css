@@ -8,12 +8,130 @@
   margin: 0 auto;
 }
 
-/* Header */
 .hostels-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: var(--spacing-xl);
+}
+
+.delete-confirm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+}
+
+.delete-confirm-modal {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.delete-confirm-modal h3 {
+  margin: 0 0 16px 0;
+  color: #111827;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.delete-confirm-modal p {
+  margin: 0 0 12px 0;
+  color: #4b5563;
+  line-height: 1.5;
+}
+
+.warning-text {
+  color: #dc2626 !important;
+  font-weight: 500;
+}
+
+.delete-confirm-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+.delete-cancel-btn {
+  padding: 10px 20px;
+  border: 1px solid #d1d5db;
+  background: white;
+  color: #374151;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.delete-cancel-btn:hover:not(:disabled) {
+  background: #f9fafb;
+}
+
+.delete-confirm-btn {
+  padding: 10px 20px;
+  background: #dc2626;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.delete-confirm-btn:hover:not(:disabled) {
+  background: #b91c1c;
+}
+
+.delete-cancel-btn:disabled,
+.delete-confirm-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.hostel-action-buttons .delete-btn:hover {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.retry-btn {
+  padding: 8px 16px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  margin-top: 12px;
+}
+
+.retry-btn:hover {
+  background: #1d4ed8;
+}
+
+.add-hostel-btn-primary {
+  padding: 12px 24px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  margin-top: 16px;
+}
+
+.add-hostel-btn-primary:hover {
+  background: #1d4ed8;
 }
 
 .hostels-header h1 {
@@ -229,14 +347,12 @@
   color: var(--error-color);
 }
 
-/* Hostel Rooms */
 .hostel-rooms {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   color: var(--primary-color);
 }
 
-/* Hostel Tenant Info */
 .hostel-tenant-info {
   display: flex;
   flex-direction: column;
@@ -254,14 +370,12 @@
   color: var(--muted-color);
 }
 
-/* Hostel Rent Amount */
 .hostel-rent-amount {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   color: var(--primary-color);
 }
 
-/* Hostel Action Buttons */
 .hostel-action-buttons {
   display: flex;
   gap: var(--spacing-xs);
@@ -287,7 +401,6 @@
   border-color: var(--primary-color);
 }
 
-/* Hostel Table Footer */
 .hostel-table-footer {
   display: flex;
   justify-content: space-between;

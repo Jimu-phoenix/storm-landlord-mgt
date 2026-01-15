@@ -1,14 +1,14 @@
-import "../../styles/AddHostelModal.css"; 
 import React, { useState, useEffect } from "react";
 import { useUser } from "@clerk/clerk-react";
 import { createClient } from "@supabase/supabase-js";
+import "../../styles/EditHostelModal.css";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY  
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
 );
 
-export default function AddHostelModal({ isOpen, onClose, onSuccess }) {
+export default function EditHostelModal({ isOpen, onClose, hostel, onSuccess }) {
   const { user } = useUser();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -30,6 +30,28 @@ export default function AddHostelModal({ isOpen, onClose, onSuccess }) {
     images: [],
     is_active: true
   });
+
+  // Populate form when hostel prop changes
+  useEffect(() => {
+    if (hostel) {
+      setFormData({
+        name: hostel.name || "",
+        description: hostel.description || "",
+        address: hostel.address || "",
+        city: hostel.city || "",
+        state: hostel.state || "",
+        plot_number: hostel.plot_number || "",
+        property_type: hostel.property_type || "hostel",
+        total_units: hostel.total_units || 1,
+        available_units: hostel.available_units || 1,
+        price_per_unit: hostel.price_per_unit || "",
+        amenities: hostel.amenities || [],
+        rules: hostel.rules || [],
+        images: hostel.images || [],
+        is_active: hostel.is_active !== undefined ? hostel.is_active : true
+      });
+    }
+  }, [hostel]);
 
   const amenitiesOptions = [
     { id: "WiFi", label: "WiFi" },
@@ -123,6 +145,12 @@ export default function AddHostelModal({ isOpen, onClose, onSuccess }) {
       return;
     }
 
+    if (!hostel || !hostel.id) {
+      setError("No hostel selected for editing");
+      setIsLoading(false);
+      return;
+    }
+
     if (formData.available_units > formData.total_units) {
       setError("Available rooms cannot be greater than total rooms");
       setIsLoading(false);
@@ -148,25 +176,18 @@ export default function AddHostelModal({ isOpen, onClose, onSuccess }) {
     }
 
     try {
-      // Auto-generate latitude/longitude (dummy values for now)
-      const latitude = -15.0000 + (Math.random() * 2 - 1);
-      const longitude = 35.0000 + (Math.random() * 2 - 1);
-
-      // Convert arrays to null if empty (matches database schema)
+      // Convert arrays to null if empty
       const amenities = formData.amenities.length > 0 ? formData.amenities : null;
       const rules = formData.rules.length > 0 ? formData.rules : null;
       const images = formData.images.length > 0 ? formData.images : null;
 
-      const newHostel = {
-        landlord_id: user.id,
+      const updatedHostel = {
         name: formData.name,
         description: formData.description || null,
         address: formData.address,
         city: formData.city,
         state: formData.state || null,
         plot_number: formData.plot_number || null,
-        latitude: parseFloat(latitude.toFixed(8)),
-        longitude: parseFloat(longitude.toFixed(8)),
         property_type: formData.property_type,
         total_units: formData.total_units,
         available_units: formData.available_units,
@@ -174,17 +195,18 @@ export default function AddHostelModal({ isOpen, onClose, onSuccess }) {
         amenities: amenities,
         rules: rules,
         images: images,
-        is_active: true
+        is_active: formData.is_active,
+        updated_at: new Date().toISOString()
       };
 
-        console.log("Submitting to hostel_details:", newHostel);
-        console.log("DEBUG: Data being sent:", JSON.stringify(newHostel, null, 2));
-        console.log("DEBUG: Has 'id' field?", 'id' in newHostel);
-        console.log("DEBUG: Object keys:", Object.keys(newHostel));
+      console.log("Updating hostel with ID:", hostel.id);
+      console.log("Update data:", updatedHostel);
 
       const { data, error } = await supabase
         .from("hostel_details")
-        .insert([newHostel])
+        .update(updatedHostel)
+        .eq("id", hostel.id)
+        .eq("landlord_id", user.id) // Security: only update if user owns it
         .select();
 
       if (error) {
@@ -192,58 +214,67 @@ export default function AddHostelModal({ isOpen, onClose, onSuccess }) {
         throw error;
       }
 
-      setSuccess("Hostel added successfully!");
-      onSuccess?.(data[0]);
+      setSuccess("Hostel updated successfully!");
       
-      // Reset form
-      setFormData({
-        name: "",
-        description: "",
-        address: "",
-        city: "",
-        state: "",
-        plot_number: "",
-        property_type: "hostel",
-        total_units: 1,
-        available_units: 1,
-        price_per_unit: "",
-        amenities: [],
-        rules: [],
-        images: [],
-        is_active: true
-      });
+      // Notify parent component
+      if (onSuccess) {
+        onSuccess(data[0]);
+      }
       
+      // Close modal after 1.5 seconds
       setTimeout(() => {
         onClose();
       }, 1500);
     } catch (err) {
-      console.error("Error adding hostel:", err);
-      setError(err.message || "Failed to add hostel. Please try again.");
+      console.error("Error updating hostel:", err);
+      setError(err.message || "Failed to update hostel. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Close modal on Escape key
   useEffect(() => {
-    const esc = (e) => e.key === "Escape" && onClose();
-    document.addEventListener("keydown", esc);
-    return () => document.removeEventListener("keydown", esc);
-  }, [onClose]);
+    const handleEscape = (e) => {
+      if (e.key === "Escape" && isOpen) {
+        onClose();
+      }
+    };
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
   return (
     <div className="modal-overlay">
       <div className="modal-container">
+        {/* Modal Header */}
         <div className="modal-header">
-          <h2>Add New Hostel</h2>
-          <button onClick={onClose} className="modal-close-btn">✕</button>
+          <div className="modal-title">
+            <h2>Edit Hostel</h2>
+            {hostel && <p className="modal-subtitle">ID: {hostel.id}</p>}
+          </div>
+          <button onClick={onClose} className="modal-close-btn">
+            &times;
+          </button>
         </div>
 
-        {error && <div className="alert alert-error">{error}</div>}
-        {success && <div className="alert alert-success">{success}</div>}
+        {/* Error/Success Messages */}
+        {error && (
+          <div className="alert alert-error">
+            <p>{error}</p>
+          </div>
+        )}
+        {success && (
+          <div className="alert alert-success">
+            <p>{success}</p>
+          </div>
+        )}
 
-        <form onSubmit={handleSubmit} className="add-hostel-form">
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="edit-hostel-form">
+          {/* Basic Information */}
           <div className="form-section">
             <h3 className="form-section-title">Basic Information</h3>
             
@@ -349,6 +380,7 @@ export default function AddHostelModal({ isOpen, onClose, onSuccess }) {
             </div>
           </div>
 
+          {/* Room Information */}
           <div className="form-section">
             <h3 className="form-section-title">Room Information</h3>
             
@@ -382,9 +414,7 @@ export default function AddHostelModal({ isOpen, onClose, onSuccess }) {
                 />
                 <p className="form-hint">Available ≤ Total rooms</p>
                 {formData.available_units > formData.total_units && (
-                  <p className="error-message" style={{color: "red", fontSize: "12px"}}>
-                    Error: Available rooms cannot exceed total rooms
-                  </p>
+                  <p className="error-message">Error: Available rooms cannot exceed total rooms</p>
                 )}
               </div>
               
@@ -407,8 +437,33 @@ export default function AddHostelModal({ isOpen, onClose, onSuccess }) {
                 <p className="form-hint">Monthly rent per room</p>
               </div>
             </div>
+
+            {/* Status Toggle */}
+            <div className="form-row">
+              <div className="form-field-full">
+                <label className="form-label" htmlFor="is_active">Status</label>
+                <div className="status-toggle">
+                  <button
+                    type="button"
+                    className={`status-btn ${formData.is_active ? 'active' : ''}`}
+                    onClick={() => setFormData(prev => ({ ...prev, is_active: true }))}
+                  >
+                    Active
+                  </button>
+                  <button
+                    type="button"
+                    className={`status-btn ${!formData.is_active ? 'inactive' : ''}`}
+                    onClick={() => setFormData(prev => ({ ...prev, is_active: false }))}
+                  >
+                    Inactive
+                  </button>
+                </div>
+                <p className="form-hint">Set hostel as active or inactive</p>
+              </div>
+            </div>
           </div>
 
+          {/* Amenities */}
           <div className="form-section">
             <h3 className="form-section-title">Amenities</h3>
             <p className="form-section-subtitle">Select amenities available at your hostel</p>
@@ -421,11 +476,15 @@ export default function AddHostelModal({ isOpen, onClose, onSuccess }) {
                   className={`amenity-btn ${formData.amenities.includes(a.id) ? "selected" : ""}`}
                 >
                   {a.label}
+                  {formData.amenities.includes(a.id) && (
+                    <span className="checkmark">✓</span>
+                  )}
                 </button>
               ))}
             </div>
           </div>
 
+          {/* Rules */}
           <div className="form-section">
             <h3 className="form-section-title">House Rules</h3>
             <p className="form-section-subtitle">Select rules that apply to your hostel</p>
@@ -444,12 +503,22 @@ export default function AddHostelModal({ isOpen, onClose, onSuccess }) {
             </div>
           </div>
 
+          {/* Form Actions */}
           <div className="form-actions">
-            <button type="button" onClick={onClose} className="btn btn-secondary" disabled={isLoading}>
+            <button
+              type="button"
+              onClick={onClose}
+              className="btn btn-secondary"
+              disabled={isLoading}
+            >
               Cancel
             </button>
-            <button type="submit" className="btn btn-primary" disabled={isLoading}>
-              {isLoading ? "Saving..." : "Add Hostel"}
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={isLoading}
+            >
+              {isLoading ? "Updating..." : "Update Hostel"}
             </button>
           </div>
         </form>

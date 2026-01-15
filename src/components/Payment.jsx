@@ -91,7 +91,7 @@ export default function Payments() {
             + Record Payment
           </button>
           <button className="record-payment-btn" onClick={()=>window.location.href = "/landlord-dashboard/paybills"}>
-            <CreditCard size={20}/> Make Payments
+            <CreditCard size={20}/> Pay Bills
           </button>
         </div>
       </header>
