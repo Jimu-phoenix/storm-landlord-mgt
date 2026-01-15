@@ -11,7 +11,14 @@ import Hostels from "./components/Hostels";
 import Tenants from "./components/Tenants";
 import PayBills from "./components/PayBills";
 import TenantDashboard from "./pages/TenantDashboard";
+import { OfflineProvider } from './offline/OfflineContext'
 import { SignedIn, SignedOut } from "@clerk/clerk-react";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
+);
 
 function ProtectedRoute({ children }) {
   return (
@@ -31,7 +38,7 @@ function App() {
         <Route path="/" element={<Landing />} />
 
         <Route path='/cross' element={
-        <ProtectedRoute>
+        <ProtectedRoute supabaseClient={supabase}>
           <Cross />
         </ProtectedRoute>
         }/>
@@ -72,7 +79,10 @@ function App() {
           <Route path="paybills" element={<PayBills />} />
         </Route>
 
-        <Route path="/tenantdash" element={<TenantDashboard />} />
+        <Route path="/tenantdash" element={
+          <OfflineProvider>
+            <TenantDashboard />
+          </OfflineProvider>} />
 
         <Route path="*" element={<h2>Page not found</h2>} />
       </Routes>

@@ -218,6 +218,182 @@
 .hostelInfo .contact a:hover::before {
   filter: brightness(0) saturate(100%) invert(6%) sepia(4%) saturate(2466%) hue-rotate(201deg) brightness(97%) contrast(91%);
 }
+/* Add to CurrentHostel.css */
+
+.loading-state {
+    text-align: center;
+    padding: 3rem;
+}
+
+.loading-state .spinner {
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #3498db;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.error-state {
+    text-align: center;
+    padding: 3rem;
+    color: #e74c3c;
+}
+
+.error-state h3 {
+    margin: 1rem 0;
+}
+
+.no-hostel {
+    text-align: center;
+    padding: 3rem;
+}
+
+.no-hostel-icon {
+    color: #95a5a6;
+    margin-bottom: 1rem;
+}
+
+.subtitle {
+    color: #7f8c8d;
+    margin-bottom: 2rem;
+}
+
+.search-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.hostelInfo .tenancy-details {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.detail-row .label {
+    color: #666;
+    font-weight: 500;
+}
+
+.detail-row .value {
+    font-weight: 600;
+}
+
+.payment-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+}
+
+.payment-badge.paid {
+    background: #d4edda;
+    color: #155724;
+}
+
+.payment-badge.unpaid {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.payment-info {
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+}
+
+.next-payment .date {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin: 0.5rem 0;
+}
+
+.pay-btn {
+    width: 100%;
+    padding: 1rem;
+    background: #2ecc71;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 1rem;
+}
+
+.pay-btn:disabled {
+    background: #95a5a6;
+    cursor: not-allowed;
+}
+
+.property-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+.amenities-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.amenity-tag {
+    background: #e8f4fc;
+    color: #2980b9;
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    font-size: 0.875rem;
+}
+
+.contact-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.contact-btn {
+    flex: 1;
+    padding: 0.75rem;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.contact-btn a {
+    color: #2c3e50;
+    text-decoration: none;
+    display: block;
+}
+
 
 @media (max-width: 768px) {
   .hostelInfo .top,
@@ -226,6 +402,13 @@
   .hostelInfo .contact {
     padding: var(--spacing-lg);
   }
+      .property-info {
+        grid-template-columns: 1fr;
+    }
+    
+    .contact-actions {
+        flex-direction: column;
+    }
 
   .hostelInfo .top h1 {
     font-size: var(--font-size-xl);
