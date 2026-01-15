@@ -1,83 +1,148 @@
-import { Search, Filter, MapPin, Bed, DollarSign, Navigation } from 'lucide-react';
-import { useState } from 'react';
+import { Search, Filter, MapPin, Bed, DollarSign, AlertCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useUser } from '@clerk/clerk-react';
+import { supabase } from '../../supabaseClient';
+import Modal from './Modal';
 import '../styles/HostelSearch.css';
 
 export default function HostelSearch() {
+  const { user, isLoaded } = useUser();
   const [searchTerm, setSearchTerm] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  const [hostels, setHostels] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [hasActiveApplication, setHasActiveApplication] = useState(false);
+  const [appliedHostelId, setAppliedHostelId] = useState(null);
+  const [modal, setModal] = useState({
+    isOpen: false,
+    type: 'info',
+    title: '',
+    message: ''
+  });
   const [filters, setFilters] = useState({
     location: '',
     beds: '',
     maxPrice: '',
-    maxDistance: '',
     availableOnly: true
   });
 
-  const availableHostels = [
-    {
-      id: 1,
-      name: 'Sunrise Hostel',
-      location: 'Blantyre City Center',
-      distance: '2.5 km',
-      price: 'MWK 45,000/month',
-      beds: 2,
-      amenities: ['WiFi', 'Water', 'Security'],
-      available: true
-    },
-    {
-      id: 2,
-      name: 'Campus View Lodge',
-      location: 'Near Polytechnic',
-      distance: '0.8 km',
-      price: 'MWK 35,000/month',
-      beds: 4,
-      amenities: ['WiFi', 'Shared Kitchen'],
-      available: true
-    },
-    {
-      id: 3,
-      name: 'Green Valley Residence',
-      location: 'Limbe',
-      distance: '5.2 km',
-      price: 'MWK 50,000/month',
-      beds: 2,
-      amenities: ['WiFi', 'Water', 'Security', 'Parking'],
-      available: false
-    },
-    {
-      id: 4,
-      name: 'Student Haven',
-      location: 'Chichiri',
-      distance: '3.7 km',
-      price: 'MWK 40,000/month',
-      beds: 3,
-      amenities: ['WiFi', 'Water'],
-      available: true
-    },
-    {
-      id: 5,
-      name: 'Modern Living Hostel',
-      location: 'Blantyre City Center',
-      distance: '2.1 km',
-      price: 'MWK 55,000/month',
-      beds: 2,
-      amenities: ['WiFi', 'Water', 'Security', 'Laundry'],
-      available: true
-    },
-    {
-      id: 6,
-      name: 'Comfort Zone',
-      location: 'Limbe',
-      distance: '4.9 km',
-      price: 'MWK 38,000/month',
-      beds: 3,
-      amenities: ['WiFi', 'Shared Kitchen', 'Security'],
-      available: true
+  useEffect(() => {
+    if (isLoaded && user) {
+      checkExistingApplication();
+      fetchHostels();
     }
-  ];
+  }, [isLoaded, user]);
 
-  const locations = [...new Set(availableHostels.map(hostel => hostel.location))];
-  const bedOptions = [...new Set(availableHostels.map(hostel => hostel.beds))].sort((a, b) => a - b);
+  const showModal = (type, title, message) => {
+    setModal({
+      isOpen: true,
+      type,
+      title,
+      message
+    });
+  };
+
+  const closeModal = () => {
+    setModal({ ...modal, isOpen: false });
+  };
+
+  const checkExistingApplication = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('tenant_applications')
+        .select('id, property_id, status')
+        .eq('tenant_id', user.id)
+        .in('status', ['pending', 'accepted'])
+        .maybeSingle();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error checking application:', error);
+        return;
+      }
+
+      if (data) {
+        setHasActiveApplication(true);
+        setAppliedHostelId(data.property_id);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
+  const fetchHostels = async () => {
+    try {
+      setLoading(true);
+      let query = supabase
+        .from('hostel_details')
+        .select('*')
+        .eq('is_active', true)
+        .gt('available_units', 0);
+
+      if (searchTerm) {
+        query = query.or(`name.ilike.%${searchTerm}%,city.ilike.%${searchTerm}%,address.ilike.%${searchTerm}%`);
+      }
+
+      if (filters.location) {
+        query = query.eq('city', filters.location);
+      }
+
+      if (filters.maxPrice) {
+        query = query.lte('price_per_unit', parseFloat(filters.maxPrice));
+      }
+
+      const { data, error } = await query.order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      setHostels(data || []);
+    } catch (error) {
+      console.error('Error fetching hostels:', error);
+      showModal('error', 'Error', 'Failed to load hostels. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleApply = async (hostelId) => {
+    if (!user) {
+      showModal('warning', 'Authentication Required', 'Please sign in to apply for a hostel.');
+      return;
+    }
+
+    if (hasActiveApplication) {
+      showModal('warning', 'Active Application', 'You already have a pending or accepted application. You can only apply to one hostel at a time.');
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const { data, error } = await supabase
+        .from('tenant_applications')
+        .insert({
+          tenant_id: user.id,
+          property_id: hostelId
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      showModal('success', 'Application Submitted!', 'Your application has been submitted successfully. Please wait for approval from the landlord.');
+      setHasActiveApplication(true);
+      setAppliedHostelId(hostelId);
+      
+    } catch (error) {
+      console.error('Application error:', error);
+      if (error.code === '23505') {
+        showModal('error', 'Duplicate Application', 'You already have an active application for this hostel.');
+      } else {
+        showModal('error', 'Application Failed', 'Failed to submit application. Please try again later.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleFilterChange = (key, value) => {
     setFilters(prev => ({ ...prev, [key]: value }));
@@ -88,90 +153,101 @@ export default function HostelSearch() {
       location: '',
       beds: '',
       maxPrice: '',
-      maxDistance: '',
       availableOnly: true
     });
     setSearchTerm('');
+    fetchHostels();
   };
 
-  const filteredHostels = availableHostels.filter(hostel => {
-    // Text search
-    const matchesSearch = searchTerm === '' || 
-      hostel.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      hostel.location.toLowerCase().includes(searchTerm.toLowerCase());
+  const locations = [...new Set(hostels.map(hostel => hostel.city))];
 
-    // Location filter
-    const matchesLocation = !filters.location || hostel.location === filters.location;
-
-    // Beds filter
-    const matchesBeds = !filters.beds || hostel.beds === parseInt(filters.beds);
-
-    // Price filter
-    const matchesPrice = !filters.maxPrice || 
-      parseInt(hostel.price.replace(/[^0-9]/g, '')) <= parseInt(filters.maxPrice);
-
-    // Distance filter
-    const matchesDistance = !filters.maxDistance || 
-      parseFloat(hostel.distance) <= parseFloat(filters.maxDistance);
-
-    // Availability filter
-    const matchesAvailability = !filters.availableOnly || hostel.available;
-
-    return matchesSearch && matchesLocation && matchesBeds && 
-           matchesPrice && matchesDistance && matchesAvailability;
+  const filteredHostels = hostels.filter(hostel => {
+    const matchesAvailability = !filters.availableOnly || hostel.available_units > 0;
+    return matchesAvailability;
   });
 
-  const HostelCard = ({ hostel }) => (
-    <div className="hostel-card">
-      <div className="hostel-card-header">
-        <h3>{hostel.name}</h3>
-        <span className={`availability-badge ${hostel.available ? 'available' : 'unavailable'}`}>
-          {hostel.available ? 'Available' : 'Occupied'}
-        </span>
+  const HostelCard = ({ hostel }) => {
+    const isThisHostelApplied = appliedHostelId === hostel.id;
+    const isDisabled = hasActiveApplication && !isThisHostelApplied;
+
+    return (
+      <div className="hostel-card">
+        <div className="hostel-card-header">
+          <h3>{hostel.name}</h3>
+          <span className={`availability-badge ${hostel.available_units > 0 ? 'available' : 'unavailable'}`}>
+            {hostel.available_units > 0 ? `${hostel.available_units} Available` : 'Full'}
+          </span>
+        </div>
+
+        <div className="hostel-details">
+          <div className="detail-row">
+            <MapPin size={16} />
+            <span>{hostel.address}, {hostel.city}</span>
+          </div>
+
+          <div className="detail-row">
+            <DollarSign size={16} />
+            <span>MWK {hostel.price_per_unit?.toLocaleString()}/month</span>
+          </div>
+
+          <div className="detail-row">
+            <Bed size={16} />
+            <span>{hostel.total_units} total units</span>
+          </div>
+        </div>
+
+        {hostel.amenities && hostel.amenities.length > 0 && (
+          <div className="amenities">
+            {hostel.amenities.slice(0, 4).map((amenity, index) => (
+              <span key={index} className="amenity-tag">{amenity}</span>
+            ))}
+            {hostel.amenities.length > 4 && (
+              <span className="amenity-tag">+{hostel.amenities.length - 4} more</span>
+            )}
+          </div>
+        )}
+
+        <button 
+          className={`view-details-btn ${isDisabled ? 'disabled' : ''} ${isThisHostelApplied ? 'applied' : ''}`}
+          onClick={() => handleApply(hostel.id)}
+          disabled={isDisabled || hostel.available_units === 0 || isThisHostelApplied}
+        >
+          {isThisHostelApplied 
+            ? 'Application Pending' 
+            : isDisabled 
+            ? 'Application in Progress' 
+            : hostel.available_units === 0 
+            ? 'Currently Full' 
+            : 'View Details & Apply'}
+        </button>
       </div>
+    );
+  };
 
-      <div className="hostel-details">
-        <div className="detail-row">
-          <MapPin size={16} />
-          <span>{hostel.location}</span>
-        </div>
-        
-        <div className="detail-row">
-          <Navigation size={16} />
-          <span>{hostel.distance} from campus</span>
-        </div>
-
-        <div className="detail-row">
-          <Bed size={16} />
-          <span>{hostel.beds} {hostel.beds === 1 ? 'bed' : 'beds'}</span>
-        </div>
-
-        <div className="detail-row">
-          <DollarSign size={16} />
-          <span>{hostel.price}</span>
+  if (loading && hostels.length === 0) {
+    return (
+      <div className="hostel-search-container">
+        <div className="loading-state">
+          <div className="spinner"></div>
+          <p>Loading hostels...</p>
         </div>
       </div>
-
-      <div className="amenities">
-        {hostel.amenities.map((amenity, index) => (
-          <span key={index} className="amenity-tag">{amenity}</span>
-        ))}
-      </div>
-
-      <button 
-        className={`view-details-btn ${!hostel.available ? 'disabled' : ''}`}
-        disabled={!hostel.available}
-      >
-        {hostel.available ? 'View Details & Apply' : 'Currently Occupied'}
-      </button>
-    </div>
-  );
+    );
+  }
 
   return (
     <div className="hostel-search-container">
+      <Modal
+        isOpen={modal.isOpen}
+        onClose={closeModal}
+        type={modal.type}
+        title={modal.title}
+        message={modal.message}
+      />
+
       <div className="search-header">
         <h1>Find Your Perfect Hostel</h1>
-        <p>Browse available hostels near campus with detailed filters</p>
+        <p>Browse available hostels and submit your application</p>
       </div>
 
       <div className="search-controls">
@@ -182,8 +258,12 @@ export default function HostelSearch() {
             placeholder="Search hostels by name or location..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && fetchHostels()}
             className="search-input"
           />
+          <button className="search-btn-inline" onClick={fetchHostels}>
+            Search
+          </button>
         </div>
 
         <div className="filter-controls">
@@ -211,7 +291,10 @@ export default function HostelSearch() {
             <select
               id="location"
               value={filters.location}
-              onChange={(e) => handleFilterChange('location', e.target.value)}
+              onChange={(e) => {
+                handleFilterChange('location', e.target.value);
+                fetchHostels();
+              }}
             >
               <option value="">All Locations</option>
               {locations.map((location, index) => (
@@ -221,48 +304,21 @@ export default function HostelSearch() {
           </div>
 
           <div className="filter-group">
-            <label htmlFor="beds">Number of Beds</label>
-            <select
-              id="beds"
-              value={filters.beds}
-              onChange={(e) => handleFilterChange('beds', e.target.value)}
-            >
-              <option value="">Any</option>
-              {bedOptions.map(beds => (
-                <option key={beds} value={beds}>{beds} {beds === 1 ? 'bed' : 'beds'}</option>
-              ))}
-            </select>
-          </div>
-
-          <div className="filter-group">
             <label htmlFor="maxPrice">Max Price (MWK)</label>
             <select
               id="maxPrice"
               value={filters.maxPrice}
-              onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
+              onChange={(e) => {
+                handleFilterChange('maxPrice', e.target.value);
+                fetchHostels();
+              }}
             >
               <option value="">Any Price</option>
-              <option value="35000">MWK 35,000</option>
+              <option value="30000">MWK 30,000</option>
               <option value="40000">MWK 40,000</option>
-              <option value="45000">MWK 45,000</option>
               <option value="50000">MWK 50,000</option>
-              <option value="55000">MWK 55,000</option>
-            </select>
-          </div>
-
-          <div className="filter-group">
-            <label htmlFor="maxDistance">Max Distance from Campus</label>
-            <select
-              id="maxDistance"
-              value={filters.maxDistance}
-              onChange={(e) => handleFilterChange('maxDistance', e.target.value)}
-            >
-              <option value="">Any Distance</option>
-              <option value="1">Within 1 km</option>
-              <option value="2">Within 2 km</option>
-              <option value="3">Within 3 km</option>
-              <option value="5">Within 5 km</option>
-              <option value="10">Within 10 km</option>
+              <option value="60000">MWK 60,000</option>
+              <option value="750000">MWK 75,000+</option>
             </select>
           </div>
 
@@ -276,6 +332,12 @@ export default function HostelSearch() {
               <span>Show available only</span>
             </label>
           </div>
+        </div>
+      )}
+
+      {hasActiveApplication && (
+        <div className="application-notice">
+          <p><AlertCircle /> You have an active application. You can only apply to one hostel at a time.</p>
         </div>
       )}
 

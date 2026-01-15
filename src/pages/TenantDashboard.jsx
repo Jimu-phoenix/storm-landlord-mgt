@@ -39,7 +39,7 @@ export default function Admin(){
 
         <div className="admin">
            <div className="header">
-            <h1>PropertyHub</h1>
+            <h1>SmartLord</h1>
             <button className="mobilemenu" onClick={handleMenu}>
                 <img width="25" height="25" src={menubtn} 
                 alt="menu--v6"/>
@@ -85,8 +85,7 @@ export default function Admin(){
                     {viewPage === 'search' && 
                     <HostelSearch />
                     }
-                    {viewPage === 'current' && <CurrentHostel />}
-                </div>
+                    {viewPage === 'current' && <CurrentHostel onSearch={() => handlePage('search')}/>}                </div>
             </section>
 
         </div>
