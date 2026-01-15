@@ -212,7 +212,6 @@ export default function Hostels() {
 });
 
     const exportToPDF = () => {
-  // Create jsPDF instance
   const doc = new jsPDF();
   
   doc.setFontSize(18);
