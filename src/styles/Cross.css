@@ -5,13 +5,33 @@
   align-items: center;
   justify-content: center;
   padding: var(--spacing-xl);
-  background: var(--muted-color);
   box-sizing: border-box;
   font-family: var(--primary-font-family);
+
+  background:
+    linear-gradient(
+      rgba(23, 73, 104, 0.75),
+      rgba(23, 73, 104, 0.75)
+    ),
+    url('https://i.pinimg.com/1200x/65/09/6e/65096ef0ce5f391964bdaf71c88aa077.jpg');
+
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
+
 .landlord-bg {
-  background: linear-gradient(135deg, var(--secondary-color), var(--muted-color) 100%);
+ background:
+    linear-gradient(
+      rgba(23, 73, 104, 0.75),
+      rgba(23, 73, 104, 0.75)
+    ),
+    url('https://i.pinimg.com/1200x/65/09/6e/65096ef0ce5f391964bdaf71c88aa077.jpg');
+
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .cross-card {
@@ -85,8 +105,8 @@
 }
 
 .user-type-card:hover:not(:disabled) {
-  transform: translateY(-5px);
-  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
   background-color: var(--hover-main-color);
 }
 

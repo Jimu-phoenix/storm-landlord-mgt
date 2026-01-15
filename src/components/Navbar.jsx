@@ -1,6 +1,6 @@
-import React from "react";
-import { Menu, Search, Bell, Sun, Moon } from "lucide-react";
-import { UserButton, useUser } from "@clerk/clerk-react";
+import React, { useState } from "react";
+import { Menu, Search, Bell, Sun, Moon, LogOut } from "lucide-react";
+import { UserButton, useUser, useClerk } from "@clerk/clerk-react";
 
 export default function Navbar({
   title,
@@ -9,13 +9,41 @@ export default function Navbar({
   setIsMobileMenuOpen,
 }) {
   const { user } = useUser();
+  const { signOut } = useClerk();
+  const [showLogoutMenu, setShowLogoutMenu] = useState(false);
 
-  // Get username directly with optional chaining
   const username = user?.fullName || 
                    user?.username || 
                    user?.firstName || 
                    user?.primaryEmailAddress?.emailAddress?.split("@")[0] || 
-                   "Mwiza";
+                   "unknown";
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      console.log("User logged out successfully");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+
+  const toggleLogoutMenu = () => {
+    setShowLogoutMenu(!showLogoutMenu);
+  };
+
+  // Close dropdown when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.user-profile-area')) {
+        setShowLogoutMenu(false);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, []);
 
   return (
     <header className="main-header">
@@ -54,12 +82,68 @@ export default function Navbar({
 
           <div className="divider" />
 
-          <div className="user-profile">
-            <div className="user-info">
-              <p className="user-name">{username}</p>
-              <p className="user-role">Landlord</p>
+          <div className="user-profile-area">
+            <div 
+              className="user-profile" 
+              onClick={toggleLogoutMenu}
+              style={{ cursor: "pointer" }}
+            >
+              <div className="user-info">
+                <p className="user-name">{username}</p>
+                <p className="user-role">Landlord</p>
+              </div>
+              
+              {/* Hidden UserButton - just for auth state */}
+              <div style={{ position: "relative", width: "40px", height: "40px" }}>
+                <UserButton 
+                  afterSignOutUrl="/"
+                  appearance={{
+                    elements: {
+                      userButtonAvatarBox: {
+                        width: "40px",
+                        height: "40px"
+                      },
+                      userButtonTrigger: {
+                        opacity: "0",
+                        position: "absolute",
+                        width: "40px",
+                        height: "40px",
+                        cursor: "pointer",
+                        zIndex: "10"
+                      }
+                    }
+                  }}
+                />
+                {/* Custom clickable avatar overlay */}
+                <div 
+                  className="custom-avatar-overlay"
+                  style={{
+                    position: "absolute",
+                    top: "0",
+                    left: "0",
+                    width: "40px",
+                    height: "40px",
+                    borderRadius: "50%",
+                    backgroundColor: "rgba(0,0,0,0.1)",
+                    cursor: "pointer",
+                    zIndex: "5"
+                  }}
+                />
+              </div>
             </div>
-            <UserButton />
+            
+            {/* Logout Dropdown Menu */}
+            {showLogoutMenu && (
+              <div className="logout-dropdown">
+                <button 
+                  className="logout-menu-item"
+                  onClick={handleLogout}
+                >
+                  <LogOut size={16} />
+                  <span>Log Out</span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

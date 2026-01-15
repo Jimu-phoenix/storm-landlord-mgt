@@ -1,92 +1,151 @@
-import React, { useState } from "react";
-import { Search, FileText, Trash2, MoreVertical, Building2 } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Search, FileText, Trash2, MoreVertical, Building2, SparklesIcon } from "lucide-react";
+import { useUser } from '@clerk/clerk-react';
+import AddHostelModal from "./ui/AddHostels";
 import "../styles/HostelComponent.css";
+import { createClient } from "@supabase/supabase-js";
 
-export default function Hostels() {
-  const [hostels] = useState([
-    {
-      id: 1,
-      name: "Sunrise Hostel",
-      address: "Plot 47/234",
-      type: "Hostel",
-      location: "Area 47, Lilongwe",
-      status: "Rented",
-      tenants: 12,
-      rent: "MWK 150.000",
-      rooms: 24,
-      occupancy: "50%"
-    },
-    {
-      id: 2,
-      name: "Kamuzu Hostel",
-      address: "Plot CC/089",
-      type: "Hostel",
-      location: "City Centre",
-      status: "Rented",
-      tenants: 15,
-      rent: "MWK 180.000",
-      rooms: 30,
-      occupancy: "50%"
-    },
-    {
-      id: 3,
-      name: "Mzuzu Student Lodge",
-      address: "Plot MZ/112",
-      type: "Hostel",
-      location: "Mzuzu University Area",
-      status: "Vacant",
-      tenants: 0,
-      rent: "MWK 120.000",
-      rooms: 20,
-      occupancy: "0%"
-    },
-    {
-      id: 4,
-      name: "Poly Hostel",
-      address: "Plot PL/045",
-      type: "Hostel",
-      location: "Polytechnic Area",
-      status: "Rented",
-      tenants: 8,
-      rent: "MWK 95.000",
-      rooms: 16,
-      occupancy: "50%"
-    },
-    {
-      id: 5,
-      name: "College Inn",
-      address: "Plot CI/112",
-      type: "Hostel",
-      location: "College Campus",
-      status: "Rented",
-      tenants: 10,
-      rent: "MWK 110.000",
-      rooms: 20,
-      occupancy: "50%"
-    },
-    {
-      id: 6,
-      name: "Student Haven",
-      address: "Plot SH/078",
-      type: "Hostel",
-      location: "University Road",
-      status: "Vacant",
-      tenants: 0,
-      rent: "MWK 135.000",
-      rooms: 25,
-      occupancy: "0%"
-    }
-  ]);
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY 
+);
 
+export default function Hostels() {  
+  const [hostels, setHostels] = useState([]);  
+  const { user } = useUser();  
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [isAddHostelModalOpen, setIsAddHostelModalOpen] = useState(false);
+
+   const handleHostelAdded = (newHostel) => {
+    console.log("New hostel added:", newHostel);
+    // Refresh your hostels list here
+  };
+
+  useEffect(() => {
+    const getHostels = async () => {
+      console.log("getHostels function called");
+      
+      if (!user) {
+        console.log("No user found, skipping fetch");
+        return;
+      }
+
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        console.log("Fetching hostels for user ID:", user.id);
+        
+        const { data, error: supabaseError } = await supabase
+          .from('hostel_details')  
+          .select('*')
+          .eq('landlord_id', user.id);  
+
+        console.log("Supabase query executed");
+        console.log("Data from Supabase:", data);
+        console.log("Supabase error:", supabaseError);
+
+        if (supabaseError) {
+          console.error("Supabase error details:", supabaseError);
+          throw supabaseError;
+        }
+
+        const formattedHostels = data?.map(hostel => ({
+          id: hostel.id,
+          name: hostel.name || 'Unnamed Hostel',
+          type: hostel.hostel_type || 'hostel',
+          address: hostel.address || 'No address',
+          location: `${hostel.city}, ${hostel.state}` || 'Unknown location',
+          status: hostel.is_active ? 'Active' : 'Inactive',
+          rooms: hostel.total_units || 0,
+          tenants: (hostel.total_units - hostel.available_units) || 0,
+          occupancy: `${Math.round(((hostel.total_units - hostel.available_units) / hostel.total_units) * 100)}%` || '0%',
+          rent: `MK ${parseFloat(hostel.price_per_unit || 0).toLocaleString()}`,
+          available_units: hostel.available_units,
+          total_units: hostel.total_units
+        })) || [];
+
+        console.log("Formatted hostels:", formattedHostels);
+        setHostels(formattedHostels);
+
+      } catch (err) {
+        console.error("Error fetching hostels:", err);
+        setError(err.message || "Failed to fetch hostels");
+      } finally {
+        setIsLoading(false);
+        console.log("Loading finished");
+      }
+    };
+
+    getHostels();
+  }, [user]);  
+
+  if (isLoading) {
+    return (
+      <div className="hostels-container">
+        <div className="loading-message">
+          <p>Loading hostels...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="hostels-container">
+        <div className="error-message">
+          <h2>Error Loading Hostels</h2>
+          <p>{error}</p>
+          <p>Debug Info:</p>
+          <ul>
+            <li>User ID: {user?.id || "No user"}</li>
+            <li>Supabase URL configured: {import.meta.env.VITE_SUPABASE_URL ? "Yes" : "No"}</li>
+            <li>Environment variables loaded: {import.meta.env.VITE_SUPABASE_ANON_KEY ? "Yes" : "No"}</li>
+          </ul>
+        </div>
+      </div>
+    );
+  }
+
+  if (hostels.length === 0) {
+    return (
+      <div className="hostels-container">
+        <header className="hostels-header">
+          <div>
+            <h1>Hostels</h1>
+            <p className="hostels-subtitle">Manage all your hostel properties</p>
+          </div>
+          <button className="add-hostel-btn" onClick={() => setIsAddHostelModalOpen(true)}>
+            + Add Hostel
+          </button>
+        </header>
+        
+        <div className="empty-state">
+          <Building2 size={48} className="empty-icon" />
+          <h3>No Hostels Found</h3>
+          <p>You haven't added any hostels yet.</p>
+          <button className="add-hostel-btn">
+            + Add Your First Hostel
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Main render
   return (
     <div className="hostels-container">
-      {/* Header */}
+      <div className="debug-panel">
+        <p><SparklesIcon size={15}/> Showing {hostels.length} hostels for {user?.firstName}</p>
+      </div>
+
       <header className="hostels-header">
         <div>
           <h1>Hostels</h1>
           <p className="hostels-subtitle">Manage all your hostel properties</p>
         </div>
-        <button className="add-hostel-btn">
+        <button className="add-hostel-btn" onClick={() => setIsAddHostelModalOpen(true)}>
           + Add Hostel
         </button>
       </header>
@@ -153,7 +212,9 @@ export default function Hostels() {
                     </span>
                   </td>
                   <td>
-                    <span className="hostel-rooms">{hostel.rooms}</span>
+                    <span className="hostel-rooms">{hostel.rooms} total</span>
+                    <br />
+                    <small>{hostel.available_units} available</small>
                   </td>
                   <td>
                     <div className="hostel-tenant-info">
@@ -201,6 +262,15 @@ export default function Hostels() {
           </div>
         </div>
       </div>
+
+      <AddHostelModal
+        isOpen={isAddHostelModalOpen}
+        onClose={() => setIsAddHostelModalOpen(false)}
+        onSuccess={handleHostelAdded}
+      />
+
     </div>
+
+    
   );
 }
