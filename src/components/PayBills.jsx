@@ -13,9 +13,16 @@ import {
   LockIcon,
 } from "lucide-react";
 import { useUser } from "@clerk/clerk-react";
+import { createClient } from "@supabase/supabase-js";
 import "../styles/PayBills.css";
 import displayReceipt from "../pages/DisplayReceipt";
 
+
+/* ---------- SUPABASE CLIENT (ADDED) ---------- */
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
+);
 
 export default function PayBills() {
   const { user, isLoaded } = useUser();
@@ -95,17 +102,37 @@ export default function PayBills() {
         throw new Error(data.error || "Payment failed");
       }
 
-      alert("✅ Bill payment successful!");
+      /* ---------- EXPENDITURE RECORDING (ADDED) ---------- */
+      const { error: expenditureError } = await supabase
+        .from("expenditures")
+        .insert({
+          landlord_id: user.id,
+          property_id: null,
+          amount: Number(amount),
+          category:
+            selectedService === "electricity" ? "electricity" : "water",
+          reference:
+            selectedService === "electricity"
+              ? "ESCOM Bill Payment"
+              : "Water Board Bill Payment",
+        });
+
+      if (expenditureError) {
+        console.error("Failed to log expenditure:", expenditureError);
+      }
+
+      alert(
+        `Bill payment of  ${data.bill.amount} to ${data.bill.biller.name} successful!`
+      );
       console.log("Payment response:", data);
 
-      displayReceipt(data, payload, selectedService);
-
+      // optional reset (UNCHANGED)
       setCustomerNumber("");
       setAmount("");
       setPhoneNumber("");
     } catch (err) {
       console.error(err);
-      alert(`❌ ${err.message}`);
+      alert(`${err.message}`);
     } finally {
       setLoading(false);
     }
