@@ -1,5 +1,6 @@
 import React from "react";
 import { Menu, Search, Bell, Sun, Moon } from "lucide-react";
+import { UserButton, useUser } from "@clerk/clerk-react";
 
 export default function Navbar({
   title,
@@ -7,6 +8,15 @@ export default function Navbar({
   setIsDarkMode,
   setIsMobileMenuOpen,
 }) {
+  const { user } = useUser();
+
+  // Get username directly with optional chaining
+  const username = user?.fullName || 
+                   user?.username || 
+                   user?.firstName || 
+                   user?.primaryEmailAddress?.emailAddress?.split("@")[0] || 
+                   "Mwiza";
+
   return (
     <header className="main-header">
       <div className="header-left">
@@ -44,17 +54,13 @@ export default function Navbar({
 
           <div className="divider" />
 
-          <button className="user-profile">
+          <div className="user-profile">
             <div className="user-info">
-              <p className="user-name">Mwiza</p>
+              <p className="user-name">{username}</p>
               <p className="user-role">Landlord</p>
             </div>
-            <img
-              className="avatar"
-              src="https://api.dicebear.com/7.x/avataaars/svg?seed=Alex"
-              alt="avatar"
-            />
-          </button>
+            <UserButton />
+          </div>
         </div>
       </div>
     </header>
