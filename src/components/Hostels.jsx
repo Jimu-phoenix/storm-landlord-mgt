@@ -2,12 +2,16 @@ import React, { useState, useEffect } from "react";
 import { Search, FileText, Trash2, MoreVertical, Building2, SparklesIcon } from "lucide-react";
 import { useUser } from '@clerk/clerk-react';
 import AddHostelModal from "./ui/AddHostels";
+import EditHostelModal from "./ui/EditHostels";
 import "../styles/HostelComponent.css";
 import { createClient } from "@supabase/supabase-js";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
+
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY 
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
 );
 
 export default function Hostels() {  
@@ -16,70 +20,125 @@ export default function Hostels() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isAddHostelModalOpen, setIsAddHostelModalOpen] = useState(false);
+  const [hostelToDelete, setHostelToDelete] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [editingHostel, setEditingHostel] = useState(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
-   const handleHostelAdded = (newHostel) => {
+
+  const handleHostelAdded = (newHostel) => {
     console.log("New hostel added:", newHostel);
-    // Refresh your hostels list here
+    fetchHostels();
+  };
+
+  const fetchHostels = async () => {
+    console.log("fetchHostels function called");
+    
+    if (!user) {
+      console.log("No user found, skipping fetch");
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      console.log("Fetching hostels for user ID:", user.id);
+      
+      const { data, error: supabaseError } = await supabase
+        .from('hostel_details')  
+        .select('*')
+        .eq('landlord_id', user.id)
+        .order('created_at', { ascending: false }); 
+
+      console.log("Supabase query executed");
+      console.log("Data from Supabase:", data);
+      console.log("Supabase error:", supabaseError);
+
+      if (supabaseError) {
+        console.error("Supabase error details:", supabaseError);
+        throw supabaseError;
+      }
+
+      const formattedHostels = data?.map(hostel => ({
+        id: hostel.id,
+        name: hostel.name || 'Unnamed Hostel',
+        type: hostel.property_type || 'hostel', 
+        address: hostel.address || 'No address',
+        location: `${hostel.city}, ${hostel.state}` || 'Unknown location',
+        status: hostel.is_active ? 'Active' : 'Inactive',
+        rooms: hostel.total_units || 0,
+        tenants: (hostel.total_units - hostel.available_units) || 0,
+        occupancy: hostel.total_units > 0 ? 
+          `${Math.round(((hostel.total_units - hostel.available_units) / hostel.total_units) * 100)}%` : '0%',
+        rent: `MK ${parseFloat(hostel.price_per_unit || 0).toLocaleString()}`,
+        available_units: hostel.available_units,
+        total_units: hostel.total_units,
+        originalData: hostel 
+      })) || [];
+
+      console.log("Formatted hostels:", formattedHostels);
+      setHostels(formattedHostels);
+
+    } catch (err) {
+      console.error("Error fetching hostels:", err);
+      setError(err.message || "Failed to fetch hostels");
+    } finally {
+      setIsLoading(false);
+      console.log("Loading finished");
+    }
   };
 
   useEffect(() => {
-    const getHostels = async () => {
-      console.log("getHostels function called");
-      
-      if (!user) {
-        console.log("No user found, skipping fetch");
-        return;
-      }
-
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        console.log("Fetching hostels for user ID:", user.id);
-        
-        const { data, error: supabaseError } = await supabase
-          .from('hostel_details')  
-          .select('*')
-          .eq('landlord_id', user.id);  
-
-        console.log("Supabase query executed");
-        console.log("Data from Supabase:", data);
-        console.log("Supabase error:", supabaseError);
-
-        if (supabaseError) {
-          console.error("Supabase error details:", supabaseError);
-          throw supabaseError;
-        }
-
-        const formattedHostels = data?.map(hostel => ({
-          id: hostel.id,
-          name: hostel.name || 'Unnamed Hostel',
-          type: hostel.hostel_type || 'hostel',
-          address: hostel.address || 'No address',
-          location: `${hostel.city}, ${hostel.state}` || 'Unknown location',
-          status: hostel.is_active ? 'Active' : 'Inactive',
-          rooms: hostel.total_units || 0,
-          tenants: (hostel.total_units - hostel.available_units) || 0,
-          occupancy: `${Math.round(((hostel.total_units - hostel.available_units) / hostel.total_units) * 100)}%` || '0%',
-          rent: `MK ${parseFloat(hostel.price_per_unit || 0).toLocaleString()}`,
-          available_units: hostel.available_units,
-          total_units: hostel.total_units
-        })) || [];
-
-        console.log("Formatted hostels:", formattedHostels);
-        setHostels(formattedHostels);
-
-      } catch (err) {
-        console.error("Error fetching hostels:", err);
-        setError(err.message || "Failed to fetch hostels");
-      } finally {
-        setIsLoading(false);
-        console.log("Loading finished");
-      }
-    };
-
-    getHostels();
+    fetchHostels();
   }, [user]);  
+
+  const handleDeleteClick = (hostel) => {
+    setHostelToDelete(hostel);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!hostelToDelete || !user) return;
+    
+    setIsDeleting(true);
+    try {
+      console.log("Deleting hostel with ID:", hostelToDelete.id);
+      
+      const { error } = await supabase
+        .from('hostel_details')
+        .delete()
+        .eq('id', hostelToDelete.id)
+        .eq('landlord_id', user.id); 
+
+      if (error) throw error;
+
+      console.log("Hostel deleted successfully");
+      
+      setHostels(prev => prev.filter(h => h.id !== hostelToDelete.id));
+      
+      setShowDeleteConfirm(false);
+      setHostelToDelete(null);
+      
+    } catch (err) {
+      console.error("Error deleting hostel:", err);
+      setError("Failed to delete hostel: " + err.message);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteConfirm(false);
+    setHostelToDelete(null);
+  };
+
+  const handleEditClick = (hostel) => {
+    setEditingHostel(hostel.originalData || hostel);
+    setIsEditModalOpen(true);
+  };
 
   if (isLoading) {
     return (
@@ -97,12 +156,9 @@ export default function Hostels() {
         <div className="error-message">
           <h2>Error Loading Hostels</h2>
           <p>{error}</p>
-          <p>Debug Info:</p>
-          <ul>
-            <li>User ID: {user?.id || "No user"}</li>
-            <li>Supabase URL configured: {import.meta.env.VITE_SUPABASE_URL ? "Yes" : "No"}</li>
-            <li>Environment variables loaded: {import.meta.env.VITE_SUPABASE_ANON_KEY ? "Yes" : "No"}</li>
-          </ul>
+          <button onClick={fetchHostels} className="retry-btn">
+            Retry
+          </button>
         </div>
       </div>
     );
@@ -116,7 +172,10 @@ export default function Hostels() {
             <h1>Hostels</h1>
             <p className="hostels-subtitle">Manage all your hostel properties</p>
           </div>
-          <button className="add-hostel-btn" onClick={() => setIsAddHostelModalOpen(true)}>
+          <button 
+            className="add-hostel-btn" 
+            onClick={() => setIsAddHostelModalOpen(true)}
+          >
             + Add Hostel
           </button>
         </header>
@@ -125,17 +184,129 @@ export default function Hostels() {
           <Building2 size={48} className="empty-icon" />
           <h3>No Hostels Found</h3>
           <p>You haven't added any hostels yet.</p>
-          <button className="add-hostel-btn">
+          <button 
+            className="add-hostel-btn-primary"
+            onClick={() => setIsAddHostelModalOpen(true)}
+          >
             + Add Your First Hostel
           </button>
         </div>
+
+        <AddHostelModal
+          isOpen={isAddHostelModalOpen}
+          onClose={() => setIsAddHostelModalOpen(false)}
+          onSuccess={handleHostelAdded}
+        />
       </div>
     );
   }
 
-  // Main render
+  const filteredHostels = hostels.filter((hostel) => {
+  const query = searchTerm.toLowerCase();
+
+  return (
+    hostel.name.toLowerCase().includes(query) ||
+    hostel.address.toLowerCase().includes(query) ||
+    hostel.location.toLowerCase().includes(query)
+  );
+});
+
+    const exportToPDF = () => {
+  // Create jsPDF instance
+  const doc = new jsPDF();
+  
+  doc.setFontSize(18);
+  doc.text("Hostels Report", 14, 20);
+  
+  doc.setFontSize(11);
+  doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 28);
+  doc.text(`Generated by: ${user?.firstName || "User"}`, 14, 35);
+  
+  const tableColumn = [
+    "Hostel Name",
+    "Type",
+    "Location",
+    "Status",
+    "Total Rooms",
+    "Occupied",
+    "Available",
+    "Monthly Rent (MWK)"
+  ];
+  
+  const tableRows = filteredHostels.map((hostel) => [
+    hostel.name,
+    hostel.type,
+    hostel.location,
+    hostel.status,
+    hostel.total_units.toString(),
+    hostel.tenants.toString(),
+    hostel.available_units.toString(),
+    hostel.rent.replace("MK ", "")
+  ]);
+  
+  // Use autoTable function directly
+  autoTable(doc, {
+    head: [tableColumn],
+    body: tableRows,
+    startY: 45,
+    theme: 'grid',
+    styles: { 
+      fontSize: 9,
+      cellPadding: 3,
+    },
+    headStyles: { 
+      fillColor: [41, 128, 185],
+      textColor: 255,
+      fontStyle: 'bold'
+    },
+    alternateRowStyles: {
+      fillColor: [245, 245, 245]
+    },
+    margin: { top: 45 }
+  });
+  
+  // Add page numbers
+  const pageCount = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFontSize(10);
+    doc.text(
+      `Page ${i} of ${pageCount}`,
+      doc.internal.pageSize.getWidth() - 30,
+      doc.internal.pageSize.getHeight() - 10
+    );
+  }
+  
+  doc.save(`hostels-report-${new Date().toISOString().split('T')[0]}.pdf`);
+};
   return (
     <div className="hostels-container">
+      {showDeleteConfirm && hostelToDelete && (
+        <div className="delete-confirm-overlay">
+          <div className="delete-confirm-modal">
+            <h3>Delete Hostel</h3>
+            <p>Are you sure you want to delete <strong>"{hostelToDelete.name}"</strong>?</p>
+            <p className="warning-text">This action cannot be undone.</p>
+            <div className="delete-confirm-actions">
+              <button 
+                onClick={cancelDelete} 
+                className="delete-cancel-btn"
+                disabled={isDeleting}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={confirmDelete} 
+                className="delete-confirm-btn"
+                disabled={isDeleting}
+              >
+                {isDeleting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="debug-panel">
         <p><SparklesIcon size={15}/> Showing {hostels.length} hostels for {user?.firstName}</p>
       </div>
@@ -145,32 +316,34 @@ export default function Hostels() {
           <h1>Hostels</h1>
           <p className="hostels-subtitle">Manage all your hostel properties</p>
         </div>
-        <button className="add-hostel-btn" onClick={() => setIsAddHostelModalOpen(true)}>
+        <button 
+          className="add-hostel-btn" 
+          onClick={() => setIsAddHostelModalOpen(true)}
+        >
           + Add Hostel
         </button>
       </header>
 
-      {/* Search and Filters */}
       <div className="hostels-controls">
         <div className="hostel-search-container">
-          <Search size={18} className="hostel-search-icon" />
           <input
             type="text"
             placeholder="Search hostels..."
             className="hostel-search-input"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
+
         </div>
         <div className="hostel-filter-actions">
-          <button className="hostel-filter-btn">
-            Filter
-          </button>
-          <button className="hostel-export-btn">
+          <button className="hostel-export-btn"
+            onClick={exportToPDF}
+          >
             Export
           </button>
         </div>
       </div>
 
-      {/* Table */}
       <div className="hostels-table-container">
         <div className="hostel-table-responsive">
           <table className="hostels-table">
@@ -187,7 +360,7 @@ export default function Hostels() {
               </tr>
             </thead>
             <tbody>
-              {hostels.map((hostel) => (
+              {filteredHostels.map((hostel) => (
                 <tr key={hostel.id} className="hostel-row">
                   <td className="hostel-cell">
                     <div className="hostel-info">
@@ -227,13 +400,24 @@ export default function Hostels() {
                   </td>
                   <td>
                     <div className="hostel-action-buttons">
-                      <button className="hostel-action-btn" title="View Details">
+                      <button 
+                        className="hostel-action-btn" 
+                        title="View Details"
+                        onClick={() => handleEditClick(hostel)}
+                      >
                         <FileText size={16} />
                       </button>
-                      <button className="hostel-action-btn" title="Delete">
+                      <button 
+                        className="hostel-action-btn delete-btn" 
+                        title="Delete"
+                        onClick={() => handleDeleteClick(hostel)}
+                      >
                         <Trash2 size={16} />
                       </button>
-                      <button className="hostel-action-btn" title="More Options">
+                      <button 
+                        className="hostel-action-btn" 
+                        title="More Options"
+                      >
                         <MoreVertical size={16} />
                       </button>
                     </div>
@@ -269,8 +453,18 @@ export default function Hostels() {
         onSuccess={handleHostelAdded}
       />
 
+      <EditHostelModal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setEditingHostel(null);
+        }}
+        hostel={editingHostel}
+        onSuccess={(updatedHostel) => {
+          console.log("Hostel updated:", updatedHostel);
+          fetchHostels(); 
+        }}
+      />
     </div>
-
-    
   );
 }
