@@ -28,19 +28,19 @@ export default function BusinessOverview() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [hostels, setHostels] = useState([]);
-  const [tenants, setTenants] = useState([]);
+  const [expenditures, setExpenditures] = useState([]);
   const [stats, setStats] = useState({
     totalIncome: 0,
     totalHostels: 0,
     roomsOccupied: 0,
     totalRooms: 0,
-    activeTenants: 0,
+    totalExpenditure: 0,
     pendingPayments: 0,
     overduePayments: 0,
     occupancyRate: 0,
     incomeChange: 0,
     occupancyChange: 0,
-    tenantChange: 0
+    expenditureChange: 0
   });
   
   // Time period state
@@ -48,7 +48,7 @@ export default function BusinessOverview() {
   const [periodComparison, setPeriodComparison] = useState({
     previousIncome: 0,
     previousOccupancy: 0,
-    previousTenants: 0
+    previousExpenditure: 0
   });
 
   useEffect(() => {
@@ -76,45 +76,28 @@ export default function BusinessOverview() {
         
         setHostels(hostelsData || []);
         
-        // Fetch tenants from the tenants table and join with hostel_details and users
-        const { data: tenantsData, error: tenantsError } = await supabase
-          .from('tenants')
-          .select(`
-            *,
-            hostel_details:hostel_id (
-              id,
-              name,
-              address,
-              city,
-              available_units,
-              total_units
-            ),
-            users:tenant_id (
-              id,
-              full_name,
-              email,
-              phone
-            )
-          `)
-          .in('status', ['active', 'applied'])
+        // Fetch expenditures for this landlord and include property details
+        const { data: expendituresData, error: expendituresError } = await supabase
+          .from('expenditures')
+          .select(`*, hostel_details:property_id (id, name, city)`) 
+          .eq('landlord_id', user.id)
           .order('created_at', { ascending: false })
-          .limit(4);
+          .limit(6);
 
-        if (tenantsError) throw tenantsError;
-        
-        // Filter tenants to only include those in the landlord's hostels
+        if (expendituresError) throw expendituresError;
+
         const landlordHostelIds = hostelsData?.map(h => h.id) || [];
-        const filteredTenants = tenantsData?.filter(tenant => 
-          landlordHostelIds.includes(tenant.hostel_id)
+        const filteredExpenditures = expendituresData?.filter(exp =>
+          !exp.property_id || landlordHostelIds.includes(exp.property_id)
         ) || [];
-        
-        setTenants(filteredTenants);
+
+        setExpenditures(filteredExpenditures);
         
         // Calculate current period statistics
-        const currentStats = calculateStatistics(hostelsData, filteredTenants, timePeriod, startDate);
+        const currentStats = calculateStatistics(hostelsData, filteredExpenditures, timePeriod, startDate);
         
         // Calculate previous period statistics
-        const previousStats = await calculatePreviousPeriodStats(hostelsData, filteredTenants, timePeriod, previousStartDate, startDate);
+        const previousStats = await calculatePreviousPeriodStats(hostelsData, filteredExpenditures, timePeriod, previousStartDate, startDate);
         
         // Calculate percentage changes
         const incomeChange = previousStats.income > 0 
@@ -125,8 +108,8 @@ export default function BusinessOverview() {
           ? ((currentStats.occupancyRate - previousStats.occupancyRate) / previousStats.occupancyRate * 100).toFixed(1)
           : 100;
           
-        const tenantChange = previousStats.activeTenants > 0
-          ? ((currentStats.activeTenants - previousStats.activeTenants) / previousStats.activeTenants * 100).toFixed(1)
+        const expenditureChange = previousStats.totalExpenditure > 0
+          ? ((currentStats.totalExpenditure - previousStats.totalExpenditure) / previousStats.totalExpenditure * 100).toFixed(1)
           : 100;
 
         // Format income
@@ -137,19 +120,19 @@ export default function BusinessOverview() {
           totalHostels: currentStats.totalHostels,
           roomsOccupied: currentStats.roomsOccupied,
           totalRooms: currentStats.totalRooms,
-          activeTenants: currentStats.activeTenants,
+          totalExpenditure: currentStats.totalExpenditure,
           pendingPayments: currentStats.pendingPayments,
           overduePayments: currentStats.overduePayments,
           occupancyRate: currentStats.occupancyRate,
           incomeChange: parseFloat(incomeChange),
           occupancyChange: parseFloat(occupancyChange),
-          tenantChange: parseFloat(tenantChange)
+          expenditureChange: parseFloat(expenditureChange)
         });
 
         setPeriodComparison({
           previousIncome: previousStats.income,
           previousOccupancy: previousStats.occupancyRate,
-          previousTenants: previousStats.activeTenants
+          previousExpenditure: previousStats.totalExpenditure
         });
 
       } catch (err) {
@@ -200,15 +183,15 @@ export default function BusinessOverview() {
     return { startDate, previousStartDate };
   };
 
-  // Calculate statistics for a given period
-  const calculateStatistics = (hostelsData, tenantsData, period, startDate) => {
+  // Calculate statistics for a given period (hostels + expenditures)
+  const calculateStatistics = (hostelsData, expendituresData, period, startDate) => {
     const totalHostels = hostelsData?.length || 0;
     let totalRooms = 0;
     let roomsOccupied = 0;
     let income = 0;
-    let activeTenants = 0;
     let pendingPayments = 0;
     let overduePayments = 0;
+    let totalExpenditure = 0;
 
     // Calculate from hostels
     hostelsData?.forEach(hostel => {
@@ -237,28 +220,11 @@ export default function BusinessOverview() {
       }
     });
 
-    // Calculate from tenants
-    tenantsData?.forEach(tenant => {
-      if (tenant.status === 'active') {
-        activeTenants++;
-        
-        // Filter by date if needed
-        const tenantStartDate = new Date(tenant.start_date);
-        if (tenantStartDate >= startDate) {
-          income += tenant.monthly_rent || 0;
-        }
-        
-        // Check for pending/overdue payments based on next_payment_date
-        if (tenant.next_payment_date) {
-          const today = new Date();
-          const paymentDate = new Date(tenant.next_payment_date);
-          
-          if (paymentDate < today) {
-            overduePayments++;
-          } else if (paymentDate <= new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000)) {
-            pendingPayments++;
-          }
-        }
+    // Sum expenditures in the period
+    expendituresData?.forEach(exp => {
+      const createdAt = exp.created_at ? new Date(exp.created_at) : null;
+      if (!createdAt || createdAt >= startDate) {
+        totalExpenditure += Number(exp.amount || 0);
       }
     });
 
@@ -269,7 +235,7 @@ export default function BusinessOverview() {
       totalRooms,
       roomsOccupied,
       income,
-      activeTenants,
+      totalExpenditure,
       pendingPayments,
       overduePayments,
       occupancyRate: parseFloat(occupancyRate)
@@ -277,7 +243,7 @@ export default function BusinessOverview() {
   };
 
   // Calculate previous period statistics
-  const calculatePreviousPeriodStats = async (hostelsData, tenantsData, period, previousStartDate, currentStartDate) => {
+  const calculatePreviousPeriodStats = async (hostelsData, expendituresData, period, previousStartDate, currentStartDate) => {
     // This is a simplified version - in a real app, you'd fetch historical data
     // For now, we'll simulate some data based on current data
     
@@ -286,19 +252,19 @@ export default function BusinessOverview() {
     
     if (isCurrentDataRecent) {
       // For demo purposes, return slightly lower numbers
-      const currentStats = calculateStatistics(hostelsData, tenantsData, period, currentStartDate);
+      const currentStats = calculateStatistics(hostelsData, expendituresData, period, currentStartDate);
       
       return {
         income: currentStats.income * 0.85, // 15% less
         occupancyRate: currentStats.occupancyRate * 0.9, // 10% less
-        activeTenants: Math.max(0, currentStats.activeTenants - 1) // 1 less
+        totalExpenditure: currentStats.totalExpenditure * 0.9 // 10% less
       };
     }
     
     return {
       income: 0,
       occupancyRate: 0,
-      activeTenants: 0
+      totalExpenditure: 0
     };
   };
 
@@ -327,6 +293,7 @@ export default function BusinessOverview() {
       case "income": label = "income"; break;
       case "occupancy": label = "occupancy"; break;
       case "tenants": label = "tenants"; break;
+      case "expenditure": label = "expenditure"; break;
     }
     
     return (
@@ -358,36 +325,7 @@ export default function BusinessOverview() {
     return { text: "Vacant", className: "vacant" };
   };
 
-  const getTenantStatusBadge = (tenant) => {
-    if (tenant.application_status === 'pending') {
-      return { text: "Applied", className: "applied" };
-    }
-    
-    switch (tenant.status) {
-      case 'active':
-        if (tenant.next_payment_date) {
-          const today = new Date();
-          const paymentDate = new Date(tenant.next_payment_date);
-          if (paymentDate < today) {
-            return { text: "Overdue", className: "overdue" };
-          }
-          if (paymentDate <= new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000)) {
-            return { text: "Pending", className: "pending" };
-          }
-        }
-        return { text: "Active", className: "active" };
-      case 'applied':
-        return { text: "Applied", className: "applied" };
-      case 'pending':
-        return { text: "Pending", className: "pending" };
-      case 'terminated':
-        return { text: "Terminated", className: "terminated" };
-      case 'completed':
-        return { text: "Completed", className: "completed" };
-      default:
-        return { text: "Unknown", className: "unknown" };
-    }
-  };
+  
 
   const getHostelImage = (hostelName, index) => {
     const images = [
@@ -536,16 +474,16 @@ export default function BusinessOverview() {
 
         <div className="stat-card">
           <div className="stat-header">
-            <span>Active Tenants</span>
-            <div className="stat-icon tenants">
-              <User size={20} />
+            <span>Total Expenditure</span>
+            <div className="stat-icon expenditures">
+              <DollarSign size={20} />
             </div>
           </div>
-          <h2>{stats.activeTenants}</h2>
-          {getChangeIndicator(stats.tenantChange, "tenants")}
+          <h2>MWK {Number(stats.totalExpenditure || 0).toLocaleString()}</h2>
+          {getChangeIndicator(stats.expenditureChange, "expenditure")}
           <div className="period-comparison">
             <span className="comparison-label">Last {timePeriod}:</span>
-            <span className="comparison-value">{periodComparison.previousTenants} tenants</span>
+            <span className="comparison-value">MWK {Number(periodComparison.previousExpenditure || 0).toLocaleString()}</span>
           </div>
         </div>
 
@@ -623,84 +561,50 @@ export default function BusinessOverview() {
         )}
       </section>
 
-      <section className="tenants-section">
+      <section className="expenditures-section">
         <div className="section-header">
-          <h3>Tenants Overview</h3>
+          <h3>Expenditures Overview</h3>
           <div className="section-header-right">
-            <a href="/landlord-dashboard/tenants" className="view-all">View all</a>
+            <a href="/landlord-dashboard/expenditures" className="view-all">View all</a>
           </div>
         </div>
 
-        {tenants.length === 0 ? (
+        {expenditures.length === 0 ? (
           <div className="empty-state">
-            <User size={48} />
-            <h4>No Tenants Found</h4>
-            <p>You don't have any tenants yet.</p>
-            <a href="/landlord-dashboard/add-tenant" className="add-hostel-btn">
-              + Add Tenant
+            <DollarSign size={48} />
+            <h4>No Expenditures Found</h4>
+            <p>You haven't recorded any expenditures yet.</p>
+            <a href="/landlord-dashboard/add-expenditure" className="add-hostel-btn">
+              + Add Expenditure
             </a>
           </div>
         ) : (
-          <div className="tenants-grid">
-            {tenants.map((tenant) => {
-              const status = getTenantStatusBadge(tenant);
-              const hostel = tenant.hostel_details;
-              const userInfo = tenant.users;
-              
-              return (
-                <div className="tenant-card" key={tenant.id}>
-                  <div className="tenant-card-header">
-                    <div className="tenant-period-indicator">
-                      {timePeriod.charAt(0).toUpperCase()}
-                    </div>
-                    <div className="tenant-avatar">
-                      <span>{getInitials(userInfo?.full_name || '??')}</span>
-                    </div>
-                  </div>
-                  <div className="tenant-info">
-                    <div className="tenant-header">
-                      <h4>{userInfo?.full_name || 'Unknown Tenant'}</h4>
-                      <span className={`status-badge ${status.className}`}>
-                        {status.text}
-                      </span>
-                    </div>
-                    <p className="tenant-property">
-                      {hostel?.name || 'Unknown Hostel'} • {hostel?.city || 'Unknown Location'}
-                    </p>
-                    <div className="tenant-stats">
-                      <div className="tenant-stat">
-                        <Calendar size={12} />
-                        <span>Since: {formatDate(tenant.start_date)}</span>
-                      </div>
-                      {tenant.next_payment_date && (
-                        <div className="tenant-stat">
-                          <span>Next payment: {formatDate(tenant.next_payment_date)}</span>
-                        </div>
-                      )}
-                    </div>
-                    <div className="tenant-financial">
-                      <div className="tenant-rent-period">
-                        <span className="rent-period-label">
-                          {timePeriod === "today" && "Today's rent: "}
-                          {timePeriod === "week" && "This week's rent: "}
-                          {timePeriod === "month" && "This month's rent: "}
-                          {timePeriod === "year" && "This year's rent: "}
-                        </span>
-                        <span className="rent-amount">
-                          MWK {Math.round(tenant.monthly_rent * (timePeriod === "year" ? 12 : 1) / (timePeriod === "today" ? 30 : timePeriod === "week" ? 4.3 : 1)).toLocaleString()}
-                        </span>
-                      </div>
-                      <div className="tenant-status">
-                        <div className="status-dot-container">
-                          <span className={`status-dot ${status.className}`}></span>
-                          <span className="status-text">{status.text}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+          <div className="expenditures-table-wrapper">
+            <table className="expenditures-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Property</th>
+                  <th>Category</th>
+                  <th>Reference</th>
+                  <th className="amount-col">Amount (MWK)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {expenditures.map((exp) => {
+                  const property = exp.hostel_details;
+                  return (
+                    <tr key={exp.id}>
+                      <td>{formatDate(exp.created_at)}</td>
+                      <td>{property?.name || 'General'}</td>
+                      <td>{exp.category || 'Other'}</td>
+                      <td>{exp.reference || '—'}</td>
+                      <td className="amount-col">{Number(exp.amount || 0).toLocaleString()}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         )}
       </section>

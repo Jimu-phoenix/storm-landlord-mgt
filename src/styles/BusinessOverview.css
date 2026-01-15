@@ -428,3 +428,193 @@
     gap: var(--spacing-xl);
   }
 }
+
+/* Expenditures Section */
+.expenditures-section {
+  background-color: var(--background-color);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+  margin-top: var(--spacing-xl);
+}
+
+.expenditures-table-wrapper {
+  overflow-x: auto;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+}
+
+.expenditures-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.expenditures-table thead {
+  background-color: var(--hover-main-color);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.expenditures-table thead th {
+  padding: var(--spacing-md) var(--spacing-lg);
+  text-align: left;
+  font-weight: var(--font-weight-semibold);
+  color: var(--primary-color);
+  border-bottom: 2px solid var(--border-color);
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.expenditures-table thead th.amount-col {
+  text-align: right;
+}
+
+.expenditures-table tbody tr {
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color 0.2s ease;
+}
+
+.expenditures-table tbody tr:hover {
+  background-color: var(--hover-main-color);
+}
+
+.expenditures-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.expenditures-table tbody td {
+  padding: var(--spacing-md) var(--spacing-lg);
+  color: var(--primary-color);
+  vertical-align: middle;
+}
+
+.expenditures-table tbody td.amount-col {
+  text-align: right;
+  font-weight: var(--font-weight-semibold);
+  color: var(--success-color);
+}
+
+.expenditures-table tbody td:first-child {
+  color: var(--secondary-color);
+  font-size: var(--font-size-xs);
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl);
+  text-align: center;
+  color: var(--secondary-color);
+}
+
+.empty-state svg {
+  color: var(--border-color);
+  margin-bottom: var(--spacing-md);
+}
+
+.empty-state h4 {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--primary-color);
+  margin: 0 0 var(--spacing-sm) 0;
+}
+
+.empty-state p {
+  font-size: var(--font-size-sm);
+  color: var(--secondary-color);
+  margin: 0 0 var(--spacing-lg) 0;
+}
+
+.add-hostel-btn {
+  display: inline-block;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background-color: var(--button-bg);
+  color: var(--button-text-color);
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.add-hostel-btn:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+/* Period Comparison Styling */
+.period-comparison {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--border-color);
+  font-size: var(--font-size-xs);
+}
+
+.comparison-label {
+  color: var(--secondary-color);
+  font-weight: var(--font-weight-medium);
+}
+
+.comparison-value {
+  color: var(--primary-color);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Responsive Tables */
+@media (max-width: 1024px) {
+  .expenditures-table thead th,
+  .expenditures-table tbody td {
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+}
+
+@media (max-width: 768px) {
+  .expenditures-section {
+    padding: var(--spacing-md);
+  }
+  
+  .expenditures-table {
+    font-size: var(--font-size-xs);
+  }
+  
+  .expenditures-table thead th,
+  .expenditures-table tbody td {
+    padding: var(--spacing-sm);
+  }
+  
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .expenditures-table-wrapper {
+    border-radius: 0;
+    margin: 0 calc(var(--spacing-md) * -1);
+    width: calc(100% + var(--spacing-md) * 2);
+  }
+  
+  .expenditures-table thead th {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--font-size-2xs);
+  }
+  
+  .expenditures-table tbody td {
+    padding: var(--spacing-xs) var(--spacing-sm);
+  }
+  
+  .empty-state {
+    padding: var(--spacing-lg) var(--spacing-md);
+  }
+}
