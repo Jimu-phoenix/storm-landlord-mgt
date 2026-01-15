@@ -190,7 +190,6 @@ body {
   box-sizing: border-box;
 }
 
-/* --- Header --- */
 .main-header {
   height: var(--header-height);
   background-color: var(--sidebar-bg);
@@ -205,6 +204,8 @@ body {
   align-items: center;
   justify-content: space-between;
   transition: background-color 0.3s ease;
+  padding-top: 20px;
+  padding-bottom: 30px;
 }
 
 .header-left {

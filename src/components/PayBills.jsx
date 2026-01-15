@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import { useUser } from "@clerk/clerk-react";
 import "../styles/PayBills.css";
+import displayReceipt from "../pages/DisplayReceipt";
+
 
 export default function PayBills() {
   const { user, isLoaded } = useUser();
@@ -96,7 +98,8 @@ export default function PayBills() {
       alert("✅ Bill payment successful!");
       console.log("Payment response:", data);
 
-      // optional reset
+      displayReceipt(data, payload, selectedService);
+
       setCustomerNumber("");
       setAmount("");
       setPhoneNumber("");
@@ -110,16 +113,14 @@ export default function PayBills() {
 
   return (
     <div className="paybills-simple">
-      {/* Header */}
       <div className="paybills-header">
         <h1>Pay Bills</h1>
         <p>Pay your utility bills securely</p>
       </div>
 
       <div className="paybills-content">
-        {/* Left Side - Form */}
+        
         <div className="paybills-form">
-          {/* Service Selection */}
           <div className="service-select">
             <h3>Select Service</h3>
             <div className="service-options">
@@ -314,6 +315,9 @@ export default function PayBills() {
               <p>
                 <Smartphone size={20} /> Save your receipt for
                 reference
+              </p>
+              <p style={{color: "#3b82f6", fontWeight: "500", fontSize: "14px"}}>
+                <span style={{fontWeight: "600"}}>Note:</span> A receipt will automatically open in a new tab after successful payment
               </p>
             </div>
           </div>

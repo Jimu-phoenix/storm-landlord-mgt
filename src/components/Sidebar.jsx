@@ -14,7 +14,6 @@ import { NavLink } from "react-router-dom";
 const menuItems = [
   { label: "Dashboard", icon: LayoutDashboard, path: "/landlord-dashboard" },
   { label: "Hostels", icon: Building2, path: "/landlord-dashboard/hostels" },
-  { label: "Tenants", icon: Users, path: "/landlord-dashboard/tenants" },
   { label: "Payments", icon: Wallet, path: "/landlord-dashboard/payments" },
   { label: "PayBills", icon: CreditCard, path: "/landlord-dashboard/paybills" },
 ];
