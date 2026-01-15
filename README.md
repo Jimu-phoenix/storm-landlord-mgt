@@ -36,7 +36,7 @@ Built with **React, Vite, and Supabase** for fast development with PostgreSQL re
 
 | Layer          | Technology               |
 |----------------|--------------------------|
-| Frontend       | React 18 + Vite          |
+| Frontend       | React + Vite             |
 | Styling        | Pure CSS (No frameworks) |
 | Backend/DB     | Supabase (PostgreSQL)    |
 | Auth           | Supabase Authentication  |
