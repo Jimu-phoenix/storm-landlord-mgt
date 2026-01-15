@@ -1,3 +1,34 @@
+/* Loading State */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl);
+  min-height: 300px;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid var(--surface-color);
+  border-top-color: var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: var(--spacing-md);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-state p {
+  color: var(--secondary-color);
+  font-size: var(--font-size-sm);
+  margin: 0;
+}
+
+/* No Hostel State */
 .no-hostel {
   display: flex;
   flex-direction: column;
@@ -55,6 +86,7 @@
   color: var(--button-text-color);
 }
 
+/* Hostel Info Container */
 .hostelInfo {
   background-color: var(--background-color);
   border-radius: var(--radius-lg);
@@ -84,6 +116,7 @@
   font-weight: var(--font-weight-medium);
 }
 
+/* Payment Status */
 .hostelInfo .payment {
   padding: var(--spacing-lg) var(--spacing-xl);
   background-color: var(--background-color);
@@ -124,6 +157,7 @@
   margin: 0;
 }
 
+/* Date/Details Section */
 .hostelInfo .date {
   padding: var(--spacing-xl);
   background-color: var(--surface-color);
@@ -151,12 +185,192 @@
   font-size: var(--font-size-lg);
 }
 
+/* Payment Action */
+.payment-action {
+  margin: var(--spacing-lg) var(--spacing-xl);
+  text-align: center;
+}
+
+.pay-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-xl);
+  background-color: var(--button-bg);
+  color: var(--button-text-color);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pay-btn:hover {
+  background-color: var(--button-hover-bg);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Payment Modal */
+.payment-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: var(--spacing-md);
+}
+
+.payment-form {
+  background-color: var(--background-color);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  max-width: 500px;
+  width: 100%;
+  box-shadow: var(--shadow-lg);
+}
+
+.form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.form-header h3 {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  color: var(--primary-color);
+  font-weight: var(--font-weight-semibold);
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--secondary-color);
+  padding: var(--spacing-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  transition: background-color 0.2s ease;
+}
+
+.close-btn:hover {
+  background-color: var(--surface-color);
+  color: var(--primary-color);
+}
+
+/* Form Styles */
+.form-group {
+  margin-bottom: var(--spacing-lg);
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: var(--spacing-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--secondary-color);
+  font-size: var(--font-size-sm);
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: var(--spacing-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-md);
+  background-color: var(--background-color);
+  color: var(--primary-color);
+  font-family: var(--primary-font-family);
+  transition: border-color 0.2s ease;
+}
+
+.form-group input:disabled,
+.form-group input.disabled-input {
+  background-color: var(--surface-color);
+  cursor: not-allowed;
+  color: var(--secondary-color);
+  opacity: 0.7;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-group input::placeholder {
+  color: var(--muted-color);
+}
+
+/* Form Actions */
+.form-actions {
+  display: flex;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-xl);
+}
+
+.cancel-btn,
+.submit-btn {
+  flex: 1;
+  padding: var(--spacing-md);
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  transition: all 0.2s ease;
+}
+
+.cancel-btn {
+  background-color: var(--surface-color);
+  color: var(--secondary-color);
+  border: 1px solid var(--border-color);
+}
+
+.cancel-btn:hover {
+  background-color: var(--hover-main-color);
+  color: var(--primary-color);
+}
+
+.submit-btn {
+  background-color: var(--button-bg);
+  color: var(--button-text-color);
+}
+
+.submit-btn:hover:not(:disabled) {
+  background-color: var(--button-hover-bg);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.submit-btn:disabled {
+  background-color: var(--button-disabled-bg);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Divider */
 .hostelInfo hr {
   border: none;
   border-top: 1px solid var(--border-color);
   margin: 0;
 }
 
+/* Contact Section */
 .hostelInfo .contact {
   padding: var(--spacing-xl);
   background-color: var(--background-color);
@@ -219,11 +433,13 @@
   filter: brightness(0) saturate(100%) invert(6%) sepia(4%) saturate(2466%) hue-rotate(201deg) brightness(97%) contrast(91%);
 }
 
+/* Responsive Design */
 @media (max-width: 768px) {
   .hostelInfo .top,
   .hostelInfo .payment,
   .hostelInfo .date,
-  .hostelInfo .contact {
+  .hostelInfo .contact,
+  .payment-action {
     padding: var(--spacing-lg);
   }
 
@@ -254,6 +470,19 @@
     width: 48px;
     height: 48px;
   }
+
+  .payment-form {
+    padding: var(--spacing-lg);
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .cancel-btn,
+  .submit-btn {
+    width: 100%;
+  }
 }
 
 @media (max-width: 480px) {
@@ -267,5 +496,21 @@
 
   .hostelInfo .contact a {
     font-size: var(--font-size-xs);
+  }
+
+  .payment-modal {
+    padding: var(--spacing-sm);
+  }
+
+  .payment-form {
+    padding: var(--spacing-md);
+  }
+
+  .form-header h3 {
+    font-size: var(--font-size-md);
+  }
+
+  .pay-btn {
+    width: 100%;
   }
 }
