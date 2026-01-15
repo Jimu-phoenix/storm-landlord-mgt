@@ -93,7 +93,7 @@ export default function PayBills() {
         throw new Error(data.error || "Payment failed");
       }
 
-      alert("✅ Bill payment successful!");
+      alert("Bill payment successful!");
       console.log("Payment response:", data);
 
       // optional reset
@@ -102,7 +102,7 @@ export default function PayBills() {
       setPhoneNumber("");
     } catch (err) {
       console.error(err);
-      alert(`❌ ${err.message}`);
+      alert(`${err.message}`);
     } finally {
       setLoading(false);
     }
