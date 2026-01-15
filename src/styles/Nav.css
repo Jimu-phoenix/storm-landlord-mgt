@@ -15,11 +15,46 @@
   align-items: center;
 }
 
+
 .nav-logo h1 {
   color: var(--primary-color);
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-semibold);
 }
+
+/* Logo Section */
+.logo-section {
+  height: auto !important;
+  padding: 0 !important;
+  border-bottom: none !important;
+}
+
+
+.brand-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-symbol {
+  width: 32px;
+  height: 32px;
+  background-color: var(--button-bg);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--button-text-color);
+}
+
+.brand-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
 
 .nav-menu {
   display: flex;

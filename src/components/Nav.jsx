@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import '../styles/Nav.css';
-import { MenuIcon, X } from 'lucide-react';
+import { MenuIcon, X,Activity } from 'lucide-react';
 
 function Nav() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -16,8 +16,15 @@ function Nav() {
   return (
     <nav className="navbar">
       <div className="nav-container">
-        <div className="nav-logo">
-          <h1>Smart-Lord</h1>
+        <div className="logo-section">
+          <div className="brand-logo">
+            <div className="brand-wrapper">
+              <span className="logo-symbol">
+                <Activity size={18} />
+              </span>
+              <h1 className="brand-name">SmartLoad</h1>
+            </div>
+          </div>
         </div>
         
         <ul className="nav-menu">
