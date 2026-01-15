@@ -1,0 +1,404 @@
+
+.paybills-simple {
+  padding: var(--spacing-xl);
+  background-color: var(--surface-color);
+  min-height: 100vh;
+  font-family: var(--primary-font-family);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Header */
+.paybills-header {
+  margin-bottom: var(--spacing-xl);
+}
+
+.paybills-header h1 {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--primary-color);
+  margin: 0 0 var(--spacing-xs) 0;
+}
+
+.paybills-header p {
+  font-size: var(--font-size-sm);
+  color: var(--secondary-color);
+  margin: 0;
+}
+
+/* Layout */
+.paybills-content {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: var(--spacing-xl);
+}
+
+/* Left Side - Form */
+.paybills-form {
+  background-color: var(--background-color);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Service Selection */
+.service-select {
+  margin-bottom: var(--spacing-xl);
+}
+
+.service-select h3 {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--primary-color);
+  margin: 0 0 var(--spacing-md) 0;
+}
+
+.service-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-md);
+}
+
+.service-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  font-family: var(--primary-font-family);
+}
+
+.service-btn.active {
+  border-color: var(--button-bg);
+  background-color: var(--hover-main-color);
+}
+
+.service-icon {
+  font-size: 24px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.service-btn div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.service-btn strong {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  color: var(--primary-color);
+}
+
+.service-btn span {
+  font-size: var(--font-size-xs);
+  color: var(--secondary-color);
+}
+
+/* Form */
+.bill-form-simple {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.form-group label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--primary-color);
+}
+
+.form-group label .icon {
+  font-size: 16px;
+  width: 20px;
+  text-align: center;
+}
+
+.form-group input {
+  padding: var(--spacing-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-family: var(--primary-font-family);
+  background-color: var(--background-color);
+  transition: border-color 0.2s ease;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(9, 9, 11, 0.1);
+}
+
+/* Payment Method */
+.payment-method-select h3 {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--primary-color);
+  margin: var(--spacing-lg) 0 var(--spacing-md) 0;
+}
+
+.payment-options {
+  display: flex;
+  gap: var(--spacing-md);
+}
+
+.pay-option {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-md);
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--primary-font-family);
+}
+
+.pay-option.active {
+  border-color: var(--button-bg);
+  background-color: var(--hover-main-color);
+}
+
+.pay-icon {
+  font-size: 20px;
+}
+
+.pay-option span:last-child {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--primary-color);
+}
+
+/* Card Details */
+.card-details-simple {
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-md);
+  background-color: var(--surface-color);
+  border-radius: var(--radius-md);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+}
+
+/* Submit Button */
+.submit-btn {
+  margin-top: var(--spacing-lg);
+  padding: var(--spacing-lg);
+  background-color: var(--button-bg);
+  color: var(--button-text-color);
+  border: none;
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  font-family: var(--primary-font-family);
+}
+
+.submit-btn:hover {
+  background-color: var(--button-hover-bg);
+}
+
+.lock-icon {
+  font-size: 18px;
+}
+
+.security-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-md);
+  font-size: var(--font-size-xs);
+  color: var(--success-color);
+}
+
+.shield-icon {
+  font-size: 14px;
+}
+
+/* Right Side - Summary */
+.paybills-summary {
+  position: sticky;
+  top: var(--spacing-xl);
+  height: fit-content;
+}
+
+.summary-card-simple {
+  background-color: var(--background-color);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+}
+
+.summary-card-simple h3 {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--primary-color);
+  margin: 0 0 var(--spacing-lg) 0;
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.summary-service {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-lg);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.summary-service-icon {
+  font-size: 32px;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.summary-service h4 {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  color: var(--primary-color);
+  margin: 0 0 2px 0;
+}
+
+.summary-service p {
+  font-size: var(--font-size-sm);
+  color: var(--secondary-color);
+  margin: 0;
+}
+
+.summary-details {
+  margin-bottom: var(--spacing-lg);
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.summary-item span:first-child {
+  font-size: var(--font-size-sm);
+  color: var(--secondary-color);
+}
+
+.summary-item span:last-child {
+  font-size: var(--font-size-sm);
+  color: var(--primary-color);
+  font-weight: var(--font-weight-medium);
+}
+
+.summary-item .amount {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+}
+
+.summary-item .method {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.method-icon {
+  font-size: 14px;
+}
+
+.summary-total {
+  padding: var(--spacing-md);
+  background-color: var(--surface-color);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.summary-total .summary-item {
+  margin-bottom: 0;
+}
+
+.summary-total .total {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--success-color);
+}
+
+.summary-info {
+  background-color: var(--surface-color);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+}
+
+.summary-info p {
+  font-size: var(--font-size-sm);
+  color: var(--secondary-color);
+  margin: 0 0 var(--spacing-xs) 0;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-xs);
+}
+
+.summary-info p:last-child {
+  margin-bottom: 0;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .paybills-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .paybills-summary {
+    position: static;
+  }
+}
+
+@media (max-width: 768px) {
+  .paybills-simple {
+    padding: var(--spacing-md);
+  }
+  
+  .service-options {
+    grid-template-columns: 1fr;
+  }
+  
+  .payment-options {
+    flex-direction: column;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}

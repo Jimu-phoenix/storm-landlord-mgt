@@ -1,0 +1,513 @@
+
+
+.tenants-container {
+  padding: var(--spacing-xl);
+  background-color: var(--surface-color);
+  min-height: 100vh;
+  font-family: var(--primary-font-family);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Header */
+.tenants-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-xl);
+}
+
+.tenants-header h1 {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--primary-color);
+  margin: 0 0 var(--spacing-xs) 0;
+}
+
+.tenants-subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--secondary-color);
+  margin: 0;
+  font-weight: var(--font-weight-regular);
+}
+
+.add-tenant-btn {
+  background-color: var(--button-bg);
+  color: var(--button-text-color);
+  border: none;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.add-tenant-btn:hover {
+  background-color: var(--button-hover-bg);
+}
+
+/* Controls */
+.tenants-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+  gap: var(--spacing-md);
+}
+
+.tenant-search-container {
+  flex: 1;
+  max-width: 400px;
+  position: relative;
+}
+
+.tenant-search-icon {
+  position: absolute;
+  left: var(--spacing-md);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted-color);
+}
+
+.tenant-search-input {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md) var(--spacing-sm) calc(var(--spacing-md) * 2 + 18px);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-family: var(--primary-font-family);
+  background-color: var(--background-color);
+  transition: border-color 0.2s ease;
+}
+
+.tenant-search-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(9, 9, 11, 0.1);
+}
+
+.tenant-filter-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.tenant-filter-btn, .tenant-export-btn {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background-color: var(--background-color);
+  color: var(--primary-color);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tenant-filter-btn:hover, .tenant-export-btn:hover {
+  background-color: var(--hover-main-color);
+  border-color: var(--primary-color);
+}
+
+/* Table Container */
+.tenants-table-container {
+  background-color: var(--background-color);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.tenant-table-responsive {
+  overflow-x: auto;
+}
+
+.tenants-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1000px;
+}
+
+.tenants-table thead {
+  background-color: var(--surface-color);
+  border-bottom: 2px solid var(--border-color);
+}
+
+.tenants-table th {
+  padding: var(--spacing-md) var(--spacing-lg);
+  text-align: left;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--secondary-color);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tenants-table th.tenant-col {
+  width: 25%;
+}
+
+.tenants-table td {
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid var(--border-color);
+  font-size: var(--font-size-sm);
+  color: var(--primary-color);
+}
+
+.tenants-table tbody tr.tenant-row:hover {
+  background-color: var(--border-color);
+}
+
+/* Tenant Cell */
+.tenant-cell {
+  padding: var(--spacing-lg);
+}
+
+.tenant-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.tenant-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--button-bg);
+  color: var(--button-text-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+  flex-shrink: 0;
+}
+
+.tenant-info strong {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--primary-color);
+  margin-bottom: var(--spacing-xs);
+}
+
+.tenant-email {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-xs);
+  color: var(--secondary-color);
+}
+
+.tenant-email svg {
+  color: var(--muted-color);
+}
+
+/* Property Info */
+.tenant-property-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.tenant-property-name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--primary-color);
+}
+
+.tenant-room {
+  font-size: var(--font-size-xs);
+  color: var(--muted-color);
+}
+
+/* Payment Status */
+.tenant-payment-status {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-block;
+}
+
+.tenant-payment-status.paid {
+  background-color: var(--success-bg);
+  color: var(--success-color);
+}
+
+.tenant-payment-status.pending {
+  background-color: var(--warning-bg);
+  color: var(--warning-color);
+}
+
+.tenant-payment-status.overdue {
+  background-color: var(--error-bg);
+  color: var(--error-color);
+}
+
+/* Last Payment */
+.tenant-last-payment {
+  font-size: var(--font-size-sm);
+  color: var(--primary-color);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Contact Info */
+.tenant-contact {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-sm);
+  color: var(--primary-color);
+}
+
+.tenant-contact svg {
+  color: var(--muted-color);
+}
+
+/* Tenant Action Buttons */
+.tenant-action-buttons {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+.tenant-action-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background-color: transparent;
+  color: var(--secondary-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tenant-action-btn:hover {
+  background-color: var(--hover-main-color);
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.tenant-action-btn:last-child {
+  background-color: var(--hover-main-color);
+  color: var(--primary-color);
+}
+
+.tenant-action-btn:last-child:hover {
+  background-color: var(--button-bg);
+  color: var(--button-text-color);
+}
+
+/* Tenant Table Footer */
+.tenant-table-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-top: 1px solid var(--border-color);
+  background-color: var(--surface-color);
+}
+
+.tenant-showing-text {
+  font-size: var(--font-size-sm);
+  color: var(--secondary-color);
+}
+
+.tenant-pagination {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+.tenant-pagination-btn {
+  padding: var(--spacing-xs) var(--spacing-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background-color: var(--background-color);
+  color: var(--primary-color);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 40px;
+  text-align: center;
+}
+
+.tenant-pagination-btn:hover:not(:disabled) {
+  background-color: var(--hover-main-color);
+  border-color: var(--primary-color);
+}
+
+.tenant-pagination-btn.active {
+  background-color: var(--button-bg);
+  color: var(--button-text-color);
+  border-color: var(--button-bg);
+}
+
+.tenant-pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+/* Tenant Statistics Section */
+.tenant-stats-section {
+  margin-bottom: var(--spacing-xl);
+}
+
+.tenant-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-lg);
+}
+
+.tenant-stat-card {
+  background-color: var(--background-color);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+}
+
+.tenant-stat-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.tenant-stat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-md);
+}
+
+.tenant-stat-header span {
+  font-size: var(--font-size-sm);
+  color: var(--secondary-color);
+  font-weight: var(--font-weight-medium);
+  flex: 1;
+}
+
+.tenant-stat-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background-color: var(--hover-main-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-color);
+  flex-shrink: 0;
+}
+
+.tenant-stat-card h2 {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--primary-color);
+  margin: 0 0 var(--spacing-sm) 0;
+  line-height: 1.2;
+}
+
+.tenant-stat-change {
+  font-size: var(--font-size-xs);
+  color: var(--muted-color);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.change-positive {
+  color: var(--success-color);
+  font-weight: var(--font-weight-medium);
+}
+
+.change-pending {
+  color: var(--warning-color);
+  font-weight: var(--font-weight-medium);
+}
+
+.change-negative {
+  color: var(--error-color);
+  font-weight: var(--font-weight-medium);
+}
+
+@media (max-width: 1024px) {
+  .tenant-stat-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .tenant-stat-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+  
+  .tenant-stat-card {
+    padding: var(--spacing-md);
+  }
+  
+  .tenant-stat-card h2 {
+    font-size: var(--font-size-xl);
+  }
+}
+
+@media (max-width: 768px) {
+  .tenants-container {
+    padding: var(--spacing-md);
+  }
+  
+  .tenants-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+  }
+  
+  .add-tenant-btn {
+    align-self: stretch;
+    justify-content: center;
+  }
+  
+  .tenants-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .tenant-search-container {
+    max-width: 100%;
+  }
+  
+  .tenant-table-footer {
+    flex-direction: column;
+    gap: var(--spacing-md);
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .tenant-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+  }
+  
+  .tenant-action-buttons {
+    flex-wrap: wrap;
+  }
+  
+  .tenant-property-info {
+    align-items: center;
+  }
+  
+  .tenant-contact {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+}
