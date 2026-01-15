@@ -40,7 +40,7 @@ export default function Cross() {
         }
 
         if (existingUser) {
-          navigate(existingUser.user_type === 'tenant' ? '/tenantdash' : '/dashboard');
+          navigate(existingUser.user_type === 'tenant' ? '/tenantdash' : 'landlord-dashboard');
         } else {
           setChecking(false);
         }
@@ -131,7 +131,7 @@ export default function Cross() {
 
       if (landlordError) throw landlordError;
 
-      navigate('/landlord');
+      navigate('/landlord-dashboard');
     } catch (err) {
       console.error('Error creating landlord:', err);
       setError(err.message || 'Failed to create landlord account');

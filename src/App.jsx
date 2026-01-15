@@ -17,7 +17,7 @@ function ProtectedRoute({ children }) {
     <>
       <SignedIn>{children}</SignedIn>
       <SignedOut>
-        <Navigate to={"/login"} />
+        <Navigate to={"/login"} replace/>
       </SignedOut>
     </>
   );
@@ -28,8 +28,33 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Landing />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<SignUp />} />
+
+        <Route path='/cross' element={
+        <ProtectedRoute>
+          <Cross />
+        </ProtectedRoute>
+        }/>
+      <Route path='/login' element={<>
+      
+      <SignedIn>
+        <Navigate to={'/cross'} replace/>
+      </SignedIn>
+      <SignedOut>
+        <Login />
+      </SignedOut>
+
+      </>}/>
+      <Route path='/signup' element={<>
+      
+      <SignedIn>
+        <Navigate to={'/cross'} replace/>
+      </SignedIn>
+      <SignedOut>
+        <SignUpStorm />
+      </SignedOut>
+
+      </>}/>
+
 
         <Route
           path="/landlord-dashboard"

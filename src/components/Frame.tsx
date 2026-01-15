@@ -11,14 +11,17 @@ export default function Frame() {
 
   const location = useLocation();
 
-  const titles = {
-  "/landlord-dashboard": "Dashboard",
-  "/landlord-dashboard/hostels": "Hostels",
-  "/landlord-dashboard/tenants": "Tenants",
-  "/landlord-dashboard/payments": "Payments",
-  "/landlord-dashboard/paybills": "PayBills",
-};
+  const titles: Record<string, string> = {
+    "/landlord-dashboard": "Dashboard",
+    "/landlord-dashboard/hostels": "Hostels",
+    "/landlord-dashboard/tenants": "Tenants",
+    "/landlord-dashboard/payments": "Payments",
+    "/landlord-dashboard/paybills": "PayBills",
+  };
 
+  const getCurrentTitle = () => {
+    return titles[location.pathname] ?? "Dashboard";
+  };
 
   useEffect(() => {
     const handleResize = () => {
@@ -45,7 +48,7 @@ export default function Frame() {
         }`}
       >
         <Navbar
-          title={titles[location.pathname] || "Dashboard"}
+          title={getCurrentTitle()}
           isDarkMode={isDarkMode}
           setIsDarkMode={setIsDarkMode}
           setIsMobileMenuOpen={setIsMobileMenuOpen}
