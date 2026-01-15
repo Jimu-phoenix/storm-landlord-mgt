@@ -1,7 +1,7 @@
 
 # SmartLord – Hostel Management System (MVP)
 
-A modern, web-based hostel management platform built by **Prince Jimu, Precious Namondwe & Mwiza Sichinga** to help landlords manage hostels, tenants, and rent payments digitally, while enabling students to discover and connect with hostels near campus.  
+A modern, web-based hostel management platform built by **Prince Jimu, Precious Namondwe & Mwiza Sichinga** to help landlords manage hostels, tenants, and rent payments digitally, while enabling students to make hostel payments and have digital proof of payments.  
 Built with **React, Vite, and Supabase** for fast development with PostgreSQL real-time database.
 
 ---
@@ -19,8 +19,8 @@ Built with **React, Vite, and Supabase** for fast development with PostgreSQL re
 - Add/Edit hostel details 
 - View all tenants per hostel with room numbers
 - Record rent payments → mark as **Paid / Pending**
-- Log expenses (electricity, water, repairs)
-- **Financial Snapshot:** Monthly income vs expenses, net profit/loss
+- Pay bills (electricity, water, repairs)
+- **Financial Snapshot:** net profit/loss
 - Search tenants by name or room
 
 ### **Tenant Portal**
@@ -36,7 +36,7 @@ Built with **React, Vite, and Supabase** for fast development with PostgreSQL re
 
 | Layer          | Technology               |
 |----------------|--------------------------|
-| Frontend       | React 18 + Vite          |
+| Frontend       | React + Vite             |
 | Styling        | Pure CSS (No frameworks) |
 | Backend/DB     | Supabase (PostgreSQL)    |
 | Auth           | Supabase Authentication  |
@@ -57,7 +57,7 @@ npm install
 ### 2. Supabase Setup
 1. Create an Account at [Supabase.com](https://supabase.com/)
 2. Create new project → note Project URL and anon public key
-3. Run the SQL schema (above) in the SQL Editor
+3. Run SQL schema in the SQL Editor
 4. Enable Email authentication in Authentication settings
 
 ### 3. Environment Variables

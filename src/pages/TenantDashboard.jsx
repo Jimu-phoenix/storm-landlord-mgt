@@ -73,12 +73,12 @@ export default function Admin(){
                             Orders</li> */}
                     </ul>
 
-                {/* <div className="user">
+                 <div className="user">
                     <UserButton></UserButton>
                     <div className="usergreeting">
                         <p>Hello, {user.firstName}</p>
                     </div>
-                </div> */}
+                </div> 
                 </div>
 
                 <div className="page-content">
