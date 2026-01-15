@@ -57,7 +57,7 @@ npm install
 ### 2. Supabase Setup
 1. Create an Account at [Supabase.com](https://supabase.com/)
 2. Create new project → note Project URL and anon public key
-3. Run the SQL schema (above) in the SQL Editor
+3. Run SQL schema in the SQL Editor
 4. Enable Email authentication in Authentication settings
 
 ### 3. Environment Variables
