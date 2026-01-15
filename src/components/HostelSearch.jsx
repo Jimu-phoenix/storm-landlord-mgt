@@ -6,6 +6,7 @@ import Modal from './Modal';
 import '../styles/HostelSearch.css';
 
 export default function HostelSearch() {
+  
   const { user, isLoaded } = useUser();
   const [searchTerm, setSearchTerm] = useState('');
   const [showFilters, setShowFilters] = useState(false);
