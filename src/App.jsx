@@ -9,6 +9,7 @@ import SignUp from './pages/SignUp'
 import SignUpStorm from './pages/SignUp'
 import { SignedIn, SignedOut } from '@clerk/clerk-react'
 import TenantDashboard from './pages/TenantDashboard'
+import Cross from './pages/Cross'
 
 
 function ProtectedRoute({children}){
@@ -20,7 +21,7 @@ function ProtectedRoute({children}){
     </SignedIn>
 
     <SignedOut>
-      <Navigate to={'/login'}/>
+      <Navigate to={'/login'} replace/>
     </SignedOut>
 
     </>
@@ -34,9 +35,36 @@ function App() {
     <BrowserRouter>
     <Routes>
       <Route path='/' element={<Landing />}/>
-      <Route path='/login' element={<Login />}/>
-      <Route path='/signup' element={<SignUpStorm />}/>
-      <Route path="/dashboard" element={<BusinessOverview />} />
+      <Route path='/cross' element={
+        <ProtectedRoute>
+          <Cross />
+        </ProtectedRoute>
+        }/>
+      <Route path='/login' element={<>
+      
+      <SignedIn>
+        <Navigate to={'/cross'} replace/>
+      </SignedIn>
+      <SignedOut>
+        <Login />
+      </SignedOut>
+
+      </>}/>
+      <Route path='/signup' element={<>
+      
+      <SignedIn>
+        <Navigate to={'/cross'} replace/>
+      </SignedIn>
+      <SignedOut>
+        <SignUpStorm />
+      </SignedOut>
+
+      </>}/>
+      <Route path="/dashboard" element={
+        <ProtectedRoute>
+          <BusinessOverview />
+        </ProtectedRoute>
+      } />
       <Route path="/tenantdash" element={<TenantDashboard />} />
       <Route path="*" element={<h2>Page not found</h2>} />
     </Routes>

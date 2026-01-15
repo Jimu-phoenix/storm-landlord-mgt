@@ -1,0 +1,417 @@
+.cross-container {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl);
+  background: var(--muted-color);
+  box-sizing: border-box;
+  font-family: var(--primary-font-family);
+}
+
+.landlord-bg {
+  background: linear-gradient(135deg, var(--secondary-color), var(--muted-color) 100%);
+}
+
+.cross-card {
+  width: 100%;
+  max-width: 900px;
+  background: var(--background-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: calc(var(--spacing-xl) * 1.5);
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.cross-form-card {
+  width: 100%;
+  max-width: 500px;
+  background: var(--background-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: var(--spacing-xl);
+  animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.cross-header {
+  text-align: center;
+  margin-bottom: calc(var(--spacing-xl) * 1.5);
+}
+
+.cross-title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--primary-color);
+  margin: 0 0 var(--spacing-md) 0;
+  line-height: var(--line-height);
+}
+
+.cross-subtitle {
+  font-size: var(--font-size-lg);
+  color: var(--secondary-color);
+  margin: 0;
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height);
+}
+
+.user-type-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-xl);
+  margin-bottom: var(--spacing-xl);
+}
+
+.user-type-card {
+  position: relative;
+  background: var(--background-color);
+  border: 3px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: calc(var(--spacing-lg) * 1.5);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.user-type-card:hover:not(:disabled) {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+  background-color: var(--hover-main-color);
+}
+
+.user-type-card:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.tenant-card:hover:not(:disabled) {
+  border-color: var(--primary-color);
+}
+
+.landlord-card:hover:not(:disabled) {
+  border-color: var(--primary-color);
+}
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.icon-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--spacing-lg);
+  transition: all 0.3s ease;
+}
+
+.tenant-icon {
+  background-color: var(--surface-color);
+  color: var(--primary-color);
+}
+
+.landlord-icon {
+  background-color: var(--surface-color);
+  color: var(--primary-color);
+}
+
+.tenant-card:hover:not(:disabled) .tenant-icon {
+  background-color: var(--primary-color);
+  color: var(--background-color);
+}
+
+.landlord-card:hover:not(:disabled) .landlord-icon {
+  background-color: var(--primary-color);
+  color: var(--background-color);
+}
+
+.icon {
+  width: 40px;
+  height: 40px;
+}
+
+.card-title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--primary-color);
+  margin: 0 0 var(--spacing-sm) 0;
+  line-height: var(--line-height);
+}
+
+.card-description {
+  font-size: var(--font-size-md);
+  color: var(--secondary-color);
+  margin: 0;
+  line-height: var(--line-height);
+  font-weight: var(--font-weight-regular);
+}
+
+.error-message {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background-color: var(--error-bg);
+  border: 2px solid var(--error-color);
+  border-radius: var(--radius-md);
+  margin-top: var(--spacing-xl);
+}
+
+.error-icon {
+  width: 22px;
+  height: 22px;
+  color: var(--error-color);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.error-text {
+  color: var(--error-color);
+  font-size: var(--font-size-md);
+  margin: 0;
+  flex: 1;
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height);
+}
+
+.form-header-section {
+  margin-bottom: var(--spacing-xl);
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  background: none;
+  border: none;
+  color: var(--secondary-color);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  padding: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+  transition: color 0.2s ease;
+  font-family: var(--primary-font-family);
+}
+
+.back-button:hover {
+  color: var(--primary-color);
+}
+
+.back-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.form-title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--primary-color);
+  margin: 0 0 var(--spacing-sm) 0;
+  line-height: var(--line-height);
+}
+
+.form-subtitle {
+  font-size: var(--font-size-md);
+  color: var(--secondary-color);
+  margin: 0;
+  line-height: var(--line-height);
+  font-weight: var(--font-weight-regular);
+}
+
+.landlord-form {
+  margin-bottom: var(--spacing-xl);
+}
+
+.form-field {
+  margin-bottom: var(--spacing-lg);
+}
+
+.field-label {
+  display: block;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  color: var(--primary-color);
+  margin-bottom: var(--spacing-sm);
+  line-height: var(--line-height);
+}
+
+.field-input {
+  width: 100%;
+  padding: var(--spacing-sm);
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-md);
+  font-family: var(--primary-font-family);
+  font-weight: var(--font-weight-regular);
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+  color: var(--primary-color);
+  background-color: var(--background-color);
+}
+
+.field-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px var(--focus-color);
+}
+
+.field-input:disabled {
+  background-color: var(--surface-color);
+  cursor: not-allowed;
+  color: var(--muted-color);
+}
+
+.field-input::placeholder {
+  color: var(--muted-color);
+}
+
+.submit-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--button-bg);
+  color: var(--button-text-color);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: var(--spacing-lg);
+  font-family: var(--primary-font-family);
+}
+
+.submit-button:hover:not(:disabled) {
+  background-color: var(--button-hover-bg);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.submit-button:disabled {
+  background-color: var(--button-disabled-bg);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top-color: var(--button-text-color);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.arrow-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.security-note {
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--secondary-color);
+  margin: 0;
+  line-height: var(--line-height);
+  font-weight: var(--font-weight-regular);
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: calc(var(--spacing-xl) * 2);
+}
+
+.loading-text {
+  margin-top: var(--spacing-lg);
+  color: var(--secondary-color);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+}
+
+@media (max-width: 768px) {
+  .cross-container {
+    padding: var(--spacing-md);
+  }
+
+  .cross-card {
+    padding: var(--spacing-xl);
+  }
+
+  .cross-title {
+    font-size: var(--font-size-xl);
+  }
+
+  .user-type-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-lg);
+  }
+
+  .cross-form-card {
+    padding: var(--spacing-xl);
+  }
+
+  .form-title {
+    font-size: var(--font-size-xl);
+  }
+}
+
+@media (max-width: 480px) {
+  .cross-card {
+    padding: var(--spacing-lg);
+  }
+
+  .cross-title {
+    font-size: var(--font-size-xl);
+  }
+
+  .cross-subtitle {
+    font-size: var(--font-size-md);
+  }
+
+  .user-type-card {
+    padding: var(--spacing-xl);
+  }
+
+  .icon-circle {
+    width: 70px;
+    height: 70px;
+  }
+
+  .icon {
+    width: 35px;
+    height: 35px;
+  }
+
+  .card-title {
+    font-size: var(--font-size-lg);
+  }
+}
