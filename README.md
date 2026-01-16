@@ -49,8 +49,8 @@ Built with **React, Vite, and Supabase** for fast development with PostgreSQL re
 
 ### 1. Clone & Install
 ```bash
-git clone [https://github.com/Jimu-phoenix/storm-landlord-mgt.git](https://github.com/Jimu-phoenix/storm-landlord-mgt.git)
-cd smartlord
+git clone https://github.com/Jimu-phoenix/storm-landlord-mgt.git
+cd storm-landlord-mgt
 npm install
 ```
 
