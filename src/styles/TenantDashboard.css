@@ -439,14 +439,14 @@
   font-size: var(--font-size-md);
 }
 
-/* Loader */
+
 .loader {
   width: 48px;
   height: 48px;
   border: 5px solid var(--surface-color);
   border-bottom-color: var(--primary-color);
   border-radius: 50%;
-  display: inline-block;
+  display: block;
   animation: rotation 1s linear infinite;
   margin: 3rem auto;
 }

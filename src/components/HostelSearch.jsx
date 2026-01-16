@@ -1,5 +1,5 @@
 import { Search, Filter, MapPin, Bed, DollarSign, AlertCircle } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useUser } from '@clerk/clerk-react';
 import { supabase } from '../lib/SupabaseClient';
 import Modal from './Modal';
@@ -14,6 +14,7 @@ export default function HostelSearch() {
   const [loading, setLoading] = useState(true);
   const [hasActiveApplication, setHasActiveApplication] = useState(false);
   const [appliedHostelId, setAppliedHostelId] = useState(null);
+  const [application, setApplication] = useState(false);
   const [modal, setModal] = useState({
     isOpen: false,
     type: 'info',
@@ -27,6 +28,7 @@ export default function HostelSearch() {
     availableOnly: true
   });
 
+  // Fetch hostels only once on mount
   useEffect(() => {
     if (isLoaded && user) {
       checkExistingApplication();
@@ -53,7 +55,7 @@ export default function HostelSearch() {
         .from('tenant_applications')
         .select('id, property_id, status')
         .eq('tenant_id', user.id)
-        .in('status', ['pending', 'accepted'])
+        .in('status', ['pending', 'approved'])
         .maybeSingle();
 
       if (error && error.code !== 'PGRST116') {
@@ -64,34 +66,22 @@ export default function HostelSearch() {
       if (data) {
         setHasActiveApplication(true);
         setAppliedHostelId(data.property_id);
+        setApplication(data);
       }
     } catch (error) {
       console.error('Error:', error);
     }
   };
 
+  // Fetch all hostels once
   const fetchHostels = async () => {
     try {
       setLoading(true);
-      let query = supabase
+      const { data, error } = await supabase
         .from('hostel_details')
         .select('*')
         .eq('is_active', true)
-        .gt('available_units', 0);
-
-      if (searchTerm) {
-        query = query.or(`name.ilike.%${searchTerm}%,city.ilike.%${searchTerm}%,address.ilike.%${searchTerm}%`);
-      }
-
-      if (filters.location) {
-        query = query.eq('city', filters.location);
-      }
-
-      if (filters.maxPrice) {
-        query = query.lte('price_per_unit', parseFloat(filters.maxPrice));
-      }
-
-      const { data, error } = await query.order('created_at', { ascending: false });
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
 
@@ -157,15 +147,45 @@ export default function HostelSearch() {
       availableOnly: true
     });
     setSearchTerm('');
-    fetchHostels();
   };
 
-  const locations = [...new Set(hostels.map(hostel => hostel.city))];
+  // Get unique locations from hostels
+  const locations = useMemo(() => {
+    return [...new Set(hostels.map(hostel => hostel.city))].sort();
+  }, [hostels]);
 
-  const filteredHostels = hostels.filter(hostel => {
-    const matchesAvailability = !filters.availableOnly || hostel.available_units > 0;
-    return matchesAvailability;
-  });
+  // Filter hostels locally based on search term and filters
+  const filteredHostels = useMemo(() => {
+    return hostels.filter(hostel => {
+      // Search term filter
+      if (searchTerm) {
+        const searchLower = searchTerm.toLowerCase();
+        const matchesSearch = 
+          hostel.name?.toLowerCase().includes(searchLower) ||
+          hostel.city?.toLowerCase().includes(searchLower) ||
+          hostel.address?.toLowerCase().includes(searchLower);
+        
+        if (!matchesSearch) return false;
+      }
+
+      // Location filter
+      if (filters.location && hostel.city !== filters.location) {
+        return false;
+      }
+
+      // Max price filter
+      if (filters.maxPrice && hostel.price_per_unit > parseFloat(filters.maxPrice)) {
+        return false;
+      }
+
+      // Available only filter
+      if (filters.availableOnly && hostel.available_units <= 0) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [hostels, searchTerm, filters]);
 
   const HostelCard = ({ hostel }) => {
     const isThisHostelApplied = appliedHostelId === hostel.id;
@@ -214,7 +234,12 @@ export default function HostelSearch() {
           disabled={isDisabled || hostel.available_units === 0 || isThisHostelApplied}
         >
           {isThisHostelApplied 
+            ? 
+            application.status === 'pending'
             ? 'Application Pending' 
+            : application.status === 'approved'
+            ? 'Your Current Hostel' 
+            : '' 
             : isDisabled 
             ? 'Application in Progress' 
             : hostel.available_units === 0 
@@ -259,12 +284,8 @@ export default function HostelSearch() {
             placeholder="Search hostels by name or location..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && fetchHostels()}
             className="search-input"
           />
-          <button className="search-btn-inline" onClick={fetchHostels}>
-            Search
-          </button>
         </div>
 
         <div className="filter-controls">
@@ -292,10 +313,7 @@ export default function HostelSearch() {
             <select
               id="location"
               value={filters.location}
-              onChange={(e) => {
-                handleFilterChange('location', e.target.value);
-                fetchHostels();
-              }}
+              onChange={(e) => handleFilterChange('location', e.target.value)}
             >
               <option value="">All Locations</option>
               {locations.map((location, index) => (
@@ -309,17 +327,15 @@ export default function HostelSearch() {
             <select
               id="maxPrice"
               value={filters.maxPrice}
-              onChange={(e) => {
-                handleFilterChange('maxPrice', e.target.value);
-                fetchHostels();
-              }}
+              onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
             >
               <option value="">Any Price</option>
               <option value="30000">MWK 30,000</option>
               <option value="40000">MWK 40,000</option>
               <option value="50000">MWK 50,000</option>
               <option value="60000">MWK 60,000</option>
-              <option value="750000">MWK 75,000+</option>
+              <option value="75000">MWK 75,000</option>
+              <option value="100000">MWK 100,000+</option>
             </select>
           </div>
 
@@ -338,7 +354,7 @@ export default function HostelSearch() {
 
       {hasActiveApplication && (
         <div className="application-notice">
-          <p><AlertCircle /> You have an active application. You can only apply to one hostel at a time.</p>
+          <p><AlertCircle size={20} /> You have an active application. You can only apply to one hostel at a time.</p>
         </div>
       )}
 
